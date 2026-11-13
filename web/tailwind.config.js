@@ -1,81 +1,123 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // REXAM Brand Palette — "Official Intelligence"
+        // Theme: Light mode only, high contrast, WCAG 2.2 AA compliant
         bg: {
-          primary: '#09090B',      // True near-black, zinc undertone
-          secondary: '#0F0F12',    // Slightly lighter panel bg
-          card: '#141418',         // Card surfaces
-          elevated: '#1C1C22',     // Elevated surfaces, dropdowns
-          hover: '#22222A',        // Hover state
-          overlay: '#050507',      // Modal overlay base
+          primary: '#FFFFFF',      // Page background
+          secondary: '#F8FAFC',    // Alternate sections, panels
+          card: '#FFFFFF',         // Card surfaces
+          elevated: '#F1F5F9',     // Dropdowns, input backgrounds, subtle pills
+          hover: '#E2E8F0',        // Hover state on elevated elements
+          alt: '#F8FAFC',          // Alternate background
         },
         border: {
-          DEFAULT: '#27272F',      // Standard border
-          subtle: '#1E1E26',       // Hairline borders
-          strong: '#38383F',       // Emphasis borders
-          accent: '#10B98130',     // Green-tinted borders
+          DEFAULT: '#E2E8F0',      // Standard border
+          subtle: '#F1F5F9',       // Hairline borders
+          strong: '#CBD5E1',       // High-contrast emphasis borders
+          accent: '#1D4ED830',     // Subtle brand-tinted border
         },
         text: {
-          primary: '#FAFAFA',      // High-contrast headings
-          secondary: '#A1A1AA',    // Body text, descriptions
-          muted: '#71717A',        // Timestamps, metadata
-          disabled: '#3F3F46',     // Disabled state
-          inverse: '#09090B',      // Text on green backgrounds
+          primary: '#0F172A',      // Primary headings & body (15.6:1 on white)
+          secondary: '#475569',    // Subheadings, labels, secondary body (5.4:1 on white)
+          muted: '#475569',        // Metadata, timestamps (never lighter than #475569 on white)
+          disabled: '#64748B',     // Form disabled text
+          inverse: '#FFFFFF',      // White text on dark/brand buttons
         },
+        // Brand & Primary Action (Blue #1D4ED8)
+        brand: {
+          DEFAULT: '#1D4ED8',      // Primary action button & links
+          hover: '#1E40AF',        // Hover state
+          light: '#EFF6FF',        // Subtle brand background
+          subtle: '#DBEAFE',       // Brand tint border
+        },
+        // Urgent Deadline (Amber)
+        urgent: {
+          DEFAULT: '#92400E',      // Amber text
+          text: '#92400E',         // Amber text
+          bg: '#FFFBEB',           // Amber background
+          border: '#F59E0B',       // Amber border
+        },
+        // Eligibility Status Colors (Strictly for Eligibility results)
+        status: {
+          eligible: {
+            text: '#15803D',       // Forest Green
+            bg: '#F0FDF4',         // Mint White
+            border: '#BBF7D0',     // Soft Green
+          },
+          ineligible: {
+            text: '#B91C1C',       // Crimson Red
+            bg: '#FEF2F2',         // Soft Red
+            border: '#FECACA',     // Soft Red Border
+          },
+          info: {
+            text: '#92400E',       // Amber
+            bg: '#FFFBEB',         // Amber Tint
+            border: '#FDE68A',     // Amber Border
+          },
+        },
+        // Accents (neutral, accessible variants)
         accent: {
-          green: '#10B981',                // Emerald — authoritative, not neon
-          'green-dim': '#10B98112',        // Green tinted backgrounds
-          'green-hover': '#059669',        // Darker hover
-          'green-muted': '#10B98140',      // Medium opacity
-          blue: '#3B82F6',
-          'blue-dim': '#3B82F612',
-          orange: '#F59E0B',
-          'orange-dim': '#F59E0B12',
-          red: '#EF4444',
-          'red-dim': '#EF444412',
-          yellow: '#EAB308',
-          'yellow-dim': '#EAB30812',
-          purple: '#8B5CF6',
-          'purple-dim': '#8B5CF612',
-        },
-        // Trust / Official palette
-        trust: {
-          bg: '#10B98108',
-          border: '#10B98125',
-          text: '#6EE7B7',
+          blue: '#1D4ED8',
+          'blue-dim': '#EFF6FF',
+          green: '#15803D',
+          'green-dim': '#F0FDF4',
+          orange: '#C2410C',
+          'orange-dim': '#FFF7ED',
+          red: '#B91C1C',
+          'red-dim': '#FEF2F2',
+          purple: '#6D28D9',
+          'purple-dim': '#F5F3FF',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
+        sans: [
+          '"Noto Sans"',
+          '"Noto Sans Devanagari"',
+          'system-ui',
+          '-apple-system',
+          'sans-serif',
+        ],
+        display: [
+          '"Noto Sans"',
+          '"Noto Sans Devanagari"',
+          'system-ui',
+          '-apple-system',
+          'sans-serif',
+        ],
       },
       fontSize: {
-        '2xs': ['10px', { lineHeight: '14px', letterSpacing: '0.03em' }],
-        '3xs': ['9px', { lineHeight: '12px', letterSpacing: '0.05em' }],
+        headline: ['clamp(28px, 5vw, 44px)', { lineHeight: '1.25', fontWeight: '700' }],
+        '2xs': ['11px', { lineHeight: '16px' }],
+        '3xs': ['10px', { lineHeight: '14px' }],
       },
       letterSpacing: {
-        tightest: '-0.04em',
-        tighter: '-0.02em',
-        display: '-0.03em',
+        normal: '0',
+        wide: '0.02em',
+        wider: '0.04em',
+      },
+      lineHeight: {
+        normal: '1.6',
+        relaxed: '1.6',
+        indic: '1.8',
+        tight: '1.25',
       },
       borderRadius: {
-        card: '10px',
-        badge: '5px',
-        pill: '999px',
+        DEFAULT: '8px',
+        card: '8px',
         button: '8px',
+        input: '8px',
+        pill: '9999px',
+        sm: '6px',
+        md: '8px',
+        lg: '8px',
       },
       boxShadow: {
-        card: '0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.6)',
-        elevated: '0 4px 20px rgba(0,0,0,0.6)',
-        glow: '0 0 24px rgba(16,185,129,0.12)',
-        'glow-sm': '0 0 12px rgba(16,185,129,0.08)',
-        'inner-border': 'inset 0 1px 0 rgba(255,255,255,0.04)',
+        none: 'none',
+        card: '0 1px 2px 0 rgba(15, 23, 42, 0.04), 0 0 0 1px #E2E8F0',
+        elevated: '0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05)',
       },
       maxWidth: {
         content: '1200px',
@@ -86,39 +128,10 @@ export default {
         'form-xs': '400px',
       },
       screens: {
-        mobile: '375px',
-        tablet: '600px',
+        mobile: '360px',
+        tablet: '768px',
         desktop: '1024px',
-        'large-desktop': '1440px',
-      },
-      animation: {
-        'fade-up': 'fadeUp 0.4s ease-out both',
-        'fade-in': 'fadeIn 0.3s ease-out both',
-        'slide-in': 'slideIn 0.3s ease-out both',
-        'pulse-dot': 'pulseDot 2s ease-in-out infinite',
-        'ticker': 'ticker 30s linear infinite',
-      },
-      keyframes: {
-        fadeUp: {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideIn: {
-          '0%': { opacity: '0', transform: 'translateX(-8px)' },
-          '100%': { opacity: '1', transform: 'translateX(0)' },
-        },
-        pulseDot: {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.4' },
-        },
-        ticker: {
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-50%)' },
-        },
+        'large-desktop': '1280px',
       },
     },
   },
