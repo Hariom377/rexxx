@@ -1,0 +1,238 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --scrollbar-color: #27272F;
+    --scrollbar-hover: #38383F;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-color);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+
+  /* Focus ring */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent-green ring-offset-2 ring-offset-bg-primary;
+  }
+
+  a { @apply text-text-primary no-underline; }
+
+  /* Smooth transitions */
+  button, a, input, select, textarea {
+    transition-property: color, background-color, border-color, box-shadow, opacity;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.03em;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+
+  /* ─── LOGO ─────────────────────────────────────── */
+  .rexam-logo {
+    @apply text-xl font-black text-text-primary;
+    letter-spacing: -0.04em;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  }
+  .rexam-logo-dot {
+    @apply text-accent-green;
+  }
+
+  /* ─── CARDS ─────────────────────────────────────── */
+  .card {
+    @apply bg-bg-card border border-border rounded-lg;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+
+  .card-hover {
+    @apply card transition-all duration-150
+      hover:border-border-strong hover:bg-bg-elevated
+      hover:shadow-lg cursor-pointer;
+  }
+
+  .card-featured {
+    @apply card border-border-accent bg-gradient-to-br from-bg-card to-bg-elevated;
+  }
+
+  /* ─── BUTTONS ───────────────────────────────────── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg
+      px-4 py-2.5 text-sm font-medium tracking-tight
+      transition-all duration-150 focus-visible:ring-2 focus-visible:ring-offset-1
+      disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent-green text-text-inverse font-semibold
+      hover:bg-accent-green-hover
+      focus-visible:ring-accent-green;
+    box-shadow: 0 0 14px rgba(16,185,129,0.15);
+  }
+
+  .btn-secondary {
+    @apply btn bg-bg-elevated border border-border text-text-primary
+      hover:bg-bg-hover hover:border-border-strong
+      focus-visible:ring-border-strong;
+  }
+
+  .btn-ghost {
+    @apply btn text-text-secondary hover:text-text-primary hover:bg-bg-hover;
+  }
+
+  .btn-danger {
+    @apply btn bg-accent-red/10 border border-accent-red/20 text-accent-red
+      hover:bg-accent-red hover:text-white
+      focus-visible:ring-accent-red;
+  }
+
+  .btn-outline {
+    @apply btn border border-accent-green text-accent-green
+      hover:bg-accent-green-dim
+      focus-visible:ring-accent-green;
+  }
+
+  /* ─── FORMS ─────────────────────────────────────── */
+  .input {
+    @apply w-full bg-bg-elevated border border-border rounded-lg
+      px-3 py-2.5 text-sm text-text-primary placeholder-text-disabled
+      focus:outline-none focus:ring-2 focus:ring-accent-green focus:ring-offset-1
+      focus:ring-offset-bg-primary focus:border-transparent
+      transition-shadow duration-150;
+  }
+
+  .input:hover:not(:focus) {
+    @apply border-border-strong;
+  }
+
+  .label {
+    @apply text-xs font-medium text-text-muted tracking-wider;
+  }
+
+  .select {
+    @apply input appearance-none cursor-pointer;
+  }
+
+  /* ─── BADGES ─────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center gap-1 text-2xs font-semibold
+      px-2 py-0.5 rounded uppercase tracking-wider;
+  }
+
+  .badge-green  { @apply badge bg-accent-green-dim text-accent-green; }
+  .badge-blue   { @apply badge bg-accent-blue-dim text-accent-blue; }
+  .badge-orange { @apply badge bg-accent-orange-dim text-accent-orange; }
+  .badge-red    { @apply badge bg-accent-red-dim text-accent-red; }
+  .badge-muted  { @apply badge bg-bg-elevated text-text-muted; }
+  .badge-purple { @apply badge bg-accent-purple-dim text-accent-purple; }
+
+  /* Status dot badge (live indicator) */
+  .badge-live {
+    @apply badge bg-accent-green-dim text-accent-green;
+  }
+
+  /* ─── TRUST ELEMENTS ─────────────────────────────── */
+  .verified-badge {
+    @apply inline-flex items-center gap-1.5 text-2xs font-medium
+      text-trust-text bg-trust-bg border border-trust-border
+      rounded-full px-2.5 py-1;
+  }
+
+  .source-chip {
+    @apply inline-flex items-center text-2xs font-semibold
+      text-text-muted bg-bg-elevated border border-border
+      rounded-full px-2.5 py-1 uppercase tracking-wider;
+  }
+
+  /* ─── TYPOGRAPHY ─────────────────────────────────── */
+  .section-label {
+    @apply text-2xs font-semibold text-text-muted uppercase tracking-wider;
+  }
+
+  .section-heading {
+    @apply text-sm font-semibold text-text-primary tracking-tight;
+  }
+
+  .page-title {
+    @apply text-xl font-bold text-text-primary;
+    letter-spacing: -0.04em;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  }
+
+  .display-heading {
+    @apply font-black text-text-primary;
+    letter-spacing: -0.04em;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  }
+
+  /* ─── LAYOUT ─────────────────────────────────────── */
+  .content-frame {
+    @apply w-full mx-auto px-4 tablet:px-6 desktop:px-8;
+  }
+
+  /* ─── DIVIDERS ───────────────────────────────────── */
+  .divider {
+    @apply w-full border-t border-border;
+  }
+
+  /* ─── SKELETON ───────────────────────────────────── */
+  .skeleton {
+    @apply bg-bg-elevated rounded-lg animate-pulse;
+  }
+
+  /* ─── NAV ────────────────────────────────────────── */
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+      text-text-secondary hover:text-text-primary hover:bg-bg-hover
+      transition-colors duration-150;
+  }
+
+  .nav-item-active {
+    @apply nav-item text-text-primary bg-bg-elevated border-l-2 border-accent-green
+      !rounded-l-none pl-[10px];
+  }
+
+  /* ─── STAT PILL ──────────────────────────────────── */
+  .stat-pill {
+    @apply inline-flex items-center gap-2 text-xs text-text-muted
+      bg-bg-secondary border border-border rounded-full px-3 py-1.5;
+  }
+
+  /* ─── OPPORTUNITY CARD ACCENT BARS ──────────────── */
+  .card-accent-left {
+    @apply relative pl-4;
+  }
+  .card-accent-left::before {
+    content: '';
+    @apply absolute left-0 top-3 bottom-3 w-0.5 rounded-full bg-accent-green;
+  }
+}

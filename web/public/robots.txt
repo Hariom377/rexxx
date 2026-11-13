@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Allow: /jobs
+Allow: /exams
+Allow: /scholarships
+Allow: /opportunities/
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+
+# Disallow private/authenticated routes
+Disallow: /dashboard
+Disallow: /discover
+Disallow: /explorer
+Disallow: /saved
+Disallow: /applications
+Disallow: /profile
+Disallow: /alerts
+Disallow: /settings
+Disallow: /eligibility/
+Disallow: /auth/
+
+Sitemap: https://rexam.in/sitemap.xml
