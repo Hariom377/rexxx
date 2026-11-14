@@ -1,0 +1,16 @@
+# Environment files
+.env
+.env.*
+*.env
+!*.env.example
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Web Node.js
+node_modules/
+dist/
