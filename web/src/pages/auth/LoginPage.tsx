@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Helmet } from 'react-helmet-async'
-import { Eye, EyeOff, ArrowRight, CheckCircle2, Shield, Bell } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight, CheckCircle2, Shield, Bell, ExternalLink } from 'lucide-react'
 import { supabase, getWebRedirectUrl } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -16,9 +16,9 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>
 
 const TRUST_POINTS = [
-  { icon: CheckCircle2, text: 'Only official .gov.in notifications' },
-  { icon: Shield, text: 'Eligibility checked before you see it' },
-  { icon: Bell, text: 'Deadline alerts personalised to your profile' },
+  { icon: CheckCircle2, text: 'Official notifications from government & public bodies' },
+  { icon: Shield, text: 'Eligibility evaluated against notification criteria' },
+  { icon: Bell, text: 'Personalised deadline alerts for your profile' },
 ]
 
 export default function LoginPage() {
@@ -75,73 +75,72 @@ export default function LoginPage() {
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <div className="min-h-screen bg-bg-primary flex">
+      <div className="min-h-screen bg-bg-page flex">
 
-        {/* ── Left Panel — Trust / Branding ────────────── */}
-        <div className="hidden desktop:flex flex-col justify-between w-96 flex-shrink-0 bg-bg-secondary border-r border-border p-10">
+        {/* ── Left Panel — Trust & Information ────────────── */}
+        <div className="hidden lg:flex flex-col justify-between w-96 flex-shrink-0 bg-bg-alternate border-r border-border-default p-10">
           <div>
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-0.5 mb-12">
-              <span className="rexam-logo text-xl">REXAM</span>
-              <span className="rexam-logo-dot text-xl font-black">.</span>
+            <Link to="/" className="inline-flex items-center gap-2 mb-10">
+              <span className="font-bold text-2xl tracking-tight text-text-primary">REXAM</span>
             </Link>
 
-            <h2 className="display-heading text-2xl leading-snug mb-4">
-              Your personalised government exam intelligence platform
+            <h2 className="text-xl font-bold text-text-primary leading-snug mb-3">
+              Government exams, recruitments and scholarships made simple
             </h2>
-            <p className="text-sm text-text-muted leading-relaxed mb-10">
-              Built for UPSC, SSC, ISRO, DRDO, SBI and all major central and state government recruitments.
-              Set your profile once. We tell you exactly what you qualify for.
+            <p className="text-sm text-text-secondary leading-relaxed mb-8">
+              We check your age, category and educational qualifications against official notification rules so you know exactly where you can apply.
             </p>
 
             <div className="space-y-4">
               {TRUST_POINTS.map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-accent-green-dim flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-3.5 h-3.5 text-accent-green" />
+                <div key={text} className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded bg-blue-50 text-brand-action flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Icon className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-sm text-text-secondary">{text}</span>
+                  <span className="text-sm text-text-secondary leading-tight">{text}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Bottom trust note */}
-          <div className="verified-badge w-fit">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse-dot flex-shrink-0" />
-            Data updated daily from 18 official sources
+          <div className="p-3.5 rounded-lg bg-white border border-border-default text-xs text-text-secondary">
+            <p className="font-medium text-text-primary mb-1">Independent Student Platform</p>
+            <p className="leading-relaxed">
+              REXAM is not a government website. Always verify on the official notification before applying.
+            </p>
           </div>
         </div>
 
         {/* ── Right Panel — Form ────────────────────────── */}
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-form-xs">
+          <div className="w-full max-w-sm">
 
             {/* Mobile logo only */}
-            <div className="desktop:hidden text-center mb-8">
-              <Link to="/" className="inline-flex items-center gap-0.5">
-                <span className="rexam-logo text-xl">REXAM</span>
-                <span className="rexam-logo-dot text-xl font-black">.</span>
+            <div className="lg:hidden text-center mb-8">
+              <Link to="/" className="inline-flex items-center gap-2">
+                <span className="font-bold text-2xl text-text-primary tracking-tight">REXAM</span>
               </Link>
             </div>
 
-            <div className="mb-8">
-              <h1 className="display-heading text-2xl mb-1">Sign in</h1>
-              <p className="text-sm text-text-muted">
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-text-primary mb-1">Sign in</h1>
+              <p className="text-sm text-text-secondary">
                 Don't have an account?{' '}
-                <Link to="/register" className="text-accent-green hover:underline font-medium">
+                <Link to="/register" className="text-brand-action hover:underline font-semibold">
                   Create one free
                 </Link>
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               {/* Google Button */}
               <button
                 type="button"
                 onClick={handleGoogle}
                 disabled={googleLoading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-button border border-border bg-bg-elevated hover:bg-bg-hover hover:border-border-strong text-sm font-medium text-text-primary transition-colors disabled:opacity-50"
+                className="w-full min-h-[44px] flex items-center justify-center gap-3 px-4 py-2.5 rounded-lg border border-border-default bg-white hover:bg-slate-50 text-sm font-semibold text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action disabled:opacity-50"
               >
                 <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -155,63 +154,70 @@ export default function LoginPage() {
               {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
+                  <div className="w-full border-t border-border-default" />
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-bg-primary px-3 text-xs text-text-muted">or sign in with email</span>
+                  <span className="bg-bg-page px-3 text-xs text-text-secondary">or sign in with email</span>
                 </div>
               </div>
 
               {/* Email Form */}
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {error && (
-                  <div className="p-3 rounded-button bg-accent-red-dim border border-accent-red/20 text-sm text-accent-red">
+                  <div className="p-3 rounded-lg bg-status-ineligible-bg border border-status-ineligible-border text-sm text-status-ineligible">
                     {error}
                   </div>
                 )}
 
                 <div>
-                  <label className="label block mb-1.5">Email address</label>
+                  <label htmlFor="login-email" className="block text-sm font-semibold text-text-primary mb-1.5">
+                    Email address
+                  </label>
                   <input
+                    id="login-email"
                     {...register('email')}
                     type="email"
-                    placeholder="your@email.com"
-                    className="input"
+                    placeholder="student@example.com"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action focus-visible:border-brand-action"
                     autoComplete="email"
                   />
-                  {errors.email && <p className="text-xs text-accent-red mt-1">{errors.email.message}</p>}
+                  {errors.email && <p className="text-xs text-status-ineligible mt-1">{errors.email.message}</p>}
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="label">Password</label>
-                    <Link to="/forgot-password" className="text-xs text-text-muted hover:text-accent-green">
+                    <label htmlFor="login-password" className="block text-sm font-semibold text-text-primary">
+                      Password
+                    </label>
+                    <Link to="/forgot-password" className="text-xs text-brand-action hover:underline">
                       Forgot password?
                     </Link>
                   </div>
                   <div className="relative">
                     <input
+                      id="login-password"
                       {...register('password')}
                       type={showPass ? 'text' : 'password'}
                       placeholder="••••••••"
-                      className="input pr-10"
+                      className="w-full min-h-[44px] px-3.5 py-2.5 pr-11 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action focus-visible:border-brand-action"
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPass(!showPass)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+                      aria-label={showPass ? "Hide password" : "Show password"}
+                      className="absolute right-0 top-0 h-full w-11 flex items-center justify-center text-text-secondary hover:text-text-primary"
                     >
                       {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {errors.password && <p className="text-xs text-accent-red mt-1">{errors.password.message}</p>}
+                  {errors.password && <p className="text-xs text-status-ineligible mt-1">{errors.password.message}</p>}
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary w-full py-3 gap-2"
+                  className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action disabled:opacity-50"
                 >
                   {loading ? 'Signing in...' : (
                     <>Sign in <ArrowRight className="w-4 h-4" /></>
@@ -220,11 +226,11 @@ export default function LoginPage() {
               </form>
             </div>
 
-            <p className="text-center text-xs text-text-disabled mt-8 leading-relaxed">
+            <p className="text-center text-xs text-text-secondary mt-8 leading-relaxed">
               By continuing, you agree to REXAM's{' '}
-              <Link to="/terms" className="text-text-muted hover:text-text-primary">Terms of Service</Link>
+              <Link to="/terms" className="text-brand-action hover:underline">Terms of Service</Link>
               {' '}and{' '}
-              <Link to="/privacy" className="text-text-muted hover:text-text-primary">Privacy Policy</Link>
+              <Link to="/privacy" className="text-brand-action hover:underline">Privacy Policy</Link>.
             </p>
           </div>
         </div>

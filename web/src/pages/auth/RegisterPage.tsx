@@ -21,9 +21,9 @@ const registerSchema = z.object({
 type RegisterForm = z.infer<typeof registerSchema>
 
 const TRUST_POINTS = [
-  { icon: CheckCircle2, text: 'Only official .gov.in notifications' },
-  { icon: Shield, text: 'Custom eligibility verification engine' },
-  { icon: Bell, text: 'Personalised deadline and vacancy alerts' },
+  { icon: CheckCircle2, text: 'Official notifications from government & public bodies' },
+  { icon: Shield, text: 'Eligibility evaluated against notification criteria' },
+  { icon: Bell, text: 'Personalised deadline alerts for your profile' },
 ]
 
 export default function RegisterPage() {
@@ -79,16 +79,19 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4">
-        <div className="card p-8 max-w-form-sm w-full text-center">
-          <div className="w-12 h-12 rounded-full bg-accent-green-dim flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="w-6 h-6 text-accent-green" />
+      <div className="min-h-screen bg-bg-page flex items-center justify-center p-4">
+        <div className="bg-white border border-border-default rounded-lg p-8 max-w-md w-full text-center">
+          <div className="w-12 h-12 rounded-full bg-status-eligible-bg border border-status-eligible-border flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="w-6 h-6 text-status-eligible" />
           </div>
-          <h2 className="display-heading text-xl mb-2">Check your email</h2>
-          <p className="text-text-muted text-sm leading-relaxed mb-6">
-            We sent an account activation link to your email address. Verify your email to complete registration.
+          <h2 className="text-xl font-bold text-text-primary mb-2">Check your email</h2>
+          <p className="text-text-secondary text-sm leading-relaxed mb-6">
+            We sent an account activation link to your email address. Please open it to verify your account and begin discovering opportunities.
           </p>
-          <Link to="/login" className="btn-primary inline-flex">
+          <Link
+            to="/login"
+            className="inline-flex items-center justify-center min-h-[44px] px-6 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white text-sm font-semibold transition-colors"
+          >
             Proceed to Login
           </Link>
         </div>
@@ -107,71 +110,70 @@ export default function RegisterPage() {
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <div className="min-h-screen bg-bg-primary flex">
-        {/* ── Left Panel — Trust / Branding ────────────── */}
-        <div className="hidden desktop:flex flex-col justify-between w-96 flex-shrink-0 bg-bg-secondary border-r border-border p-10">
+      <div className="min-h-screen bg-bg-page flex">
+        {/* ── Left Panel — Trust & Information ────────────── */}
+        <div className="hidden lg:flex flex-col justify-between w-96 flex-shrink-0 bg-bg-alternate border-r border-border-default p-10">
           <div>
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-0.5 mb-12">
-              <span className="rexam-logo text-xl">REXAM</span>
-              <span className="rexam-logo-dot text-xl font-black">.</span>
+            <Link to="/" className="inline-flex items-center gap-2 mb-10">
+              <span className="font-bold text-2xl tracking-tight text-text-primary">REXAM</span>
             </Link>
 
-            <h2 className="display-heading text-2xl leading-snug mb-4">
-              Your personalized government exam intelligence platform
+            <h2 className="text-xl font-bold text-text-primary leading-snug mb-3">
+              Government exams, recruitments and scholarships made simple
             </h2>
-            <p className="text-sm text-text-muted leading-relaxed mb-10">
-              Built for UPSC, SSC, ISRO, DRDO, State PSCs, and central institutions.
-              Complete your profile once and see the exact examinations and scholarships you are eligible for.
+            <p className="text-sm text-text-secondary leading-relaxed mb-8">
+              Complete your profile once. We check official notification criteria for UPSC, SSC, Railways, State PSCs, and central institutions to show where you qualify.
             </p>
 
             <div className="space-y-4">
               {TRUST_POINTS.map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-accent-green-dim flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-3.5 h-3.5 text-accent-green" />
+                <div key={text} className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded bg-blue-50 text-brand-action flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Icon className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-sm text-text-secondary">{text}</span>
+                  <span className="text-sm text-text-secondary leading-tight">{text}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Bottom trust note */}
-          <div className="verified-badge w-fit">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse-dot flex-shrink-0" />
-            Verified official notifications only · Zero spam
+          <div className="p-3.5 rounded-lg bg-white border border-border-default text-xs text-text-secondary">
+            <p className="font-medium text-text-primary mb-1">Independent Student Platform</p>
+            <p className="leading-relaxed">
+              REXAM is not a government website. Always verify on official notifications before applying.
+            </p>
           </div>
         </div>
 
         {/* ── Right Panel — Form ────────────────────────── */}
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-form-xs">
+          <div className="w-full max-w-sm">
             {/* Mobile logo only */}
-            <div className="desktop:hidden text-center mb-8">
-              <Link to="/" className="inline-flex items-center gap-0.5">
-                <span className="rexam-logo text-xl">REXAM</span>
-                <span className="rexam-logo-dot text-xl font-black">.</span>
+            <div className="lg:hidden text-center mb-8">
+              <Link to="/" className="inline-flex items-center gap-2">
+                <span className="font-bold text-2xl text-text-primary tracking-tight">REXAM</span>
               </Link>
             </div>
 
-            <div className="mb-8">
-              <h1 className="display-heading text-2xl mb-1">Create account</h1>
-              <p className="text-sm text-text-muted">
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-text-primary mb-1">Create account</h1>
+              <p className="text-sm text-text-secondary">
                 Already registered?{' '}
-                <Link to="/login" className="text-accent-green hover:underline font-medium">
+                <Link to="/login" className="text-brand-action hover:underline font-semibold">
                   Sign in
                 </Link>
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               {/* Google Button */}
               <button
                 type="button"
                 onClick={handleGoogle}
                 disabled={googleLoading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-lg border border-border bg-bg-elevated hover:bg-bg-hover hover:border-border-strong text-sm font-medium text-text-primary transition-colors disabled:opacity-50"
+                className="w-full min-h-[44px] flex items-center justify-center gap-3 px-4 py-2.5 rounded-lg border border-border-default bg-white hover:bg-slate-50 text-sm font-semibold text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action disabled:opacity-50"
               >
                 <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                   <path
@@ -197,81 +199,98 @@ export default function RegisterPage() {
               {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
+                  <div className="w-full border-t border-border-default" />
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-bg-primary px-3 text-xs text-text-muted">or register with email</span>
+                  <span className="bg-bg-page px-3 text-xs text-text-secondary">or register with email</span>
                 </div>
               </div>
 
               {/* Form */}
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {error && (
-                  <div className="p-3 rounded-lg bg-accent-red-dim border border-accent-red/20 text-sm text-accent-red">
+                  <div className="p-3 rounded-lg bg-status-ineligible-bg border border-status-ineligible-border text-sm text-status-ineligible">
                     {error}
                   </div>
                 )}
 
                 <div>
-                  <label className="label block mb-1.5">Full name</label>
+                  <label htmlFor="reg-name" className="block text-sm font-semibold text-text-primary mb-1.5">
+                    Full name
+                  </label>
                   <input
+                    id="reg-name"
                     {...register('fullName')}
                     type="text"
                     placeholder="Priya Sharma"
-                    className="input"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action focus-visible:border-brand-action"
                     autoComplete="name"
                   />
-                  {errors.fullName && <p className="text-xs text-accent-red mt-1">{errors.fullName.message}</p>}
+                  {errors.fullName && <p className="text-xs text-status-ineligible mt-1">{errors.fullName.message}</p>}
                 </div>
 
                 <div>
-                  <label className="label block mb-1.5">Email address</label>
+                  <label htmlFor="reg-email" className="block text-sm font-semibold text-text-primary mb-1.5">
+                    Email address
+                  </label>
                   <input
+                    id="reg-email"
                     {...register('email')}
                     type="email"
-                    placeholder="your@email.com"
-                    className="input"
+                    placeholder="student@example.com"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action focus-visible:border-brand-action"
                     autoComplete="email"
                   />
-                  {errors.email && <p className="text-xs text-accent-red mt-1">{errors.email.message}</p>}
+                  {errors.email && <p className="text-xs text-status-ineligible mt-1">{errors.email.message}</p>}
                 </div>
 
                 <div>
-                  <label className="label block mb-1.5">Password</label>
+                  <label htmlFor="reg-password" className="block text-sm font-semibold text-text-primary mb-1.5">
+                    Password
+                  </label>
                   <div className="relative">
                     <input
+                      id="reg-password"
                       {...register('password')}
                       type={showPass ? 'text' : 'password'}
                       placeholder="At least 8 characters"
-                      className="input pr-10"
+                      className="w-full min-h-[44px] px-3.5 py-2.5 pr-11 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action focus-visible:border-brand-action"
                       autoComplete="new-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPass(!showPass)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+                      aria-label={showPass ? "Hide password" : "Show password"}
+                      className="absolute right-0 top-0 h-full w-11 flex items-center justify-center text-text-secondary hover:text-text-primary"
                     >
                       {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {errors.password && <p className="text-xs text-accent-red mt-1">{errors.password.message}</p>}
+                  {errors.password && <p className="text-xs text-status-ineligible mt-1">{errors.password.message}</p>}
                 </div>
 
                 <div>
-                  <label className="label block mb-1.5">Confirm password</label>
+                  <label htmlFor="reg-confirm" className="block text-sm font-semibold text-text-primary mb-1.5">
+                    Confirm password
+                  </label>
                   <input
+                    id="reg-confirm"
                     {...register('confirmPassword')}
                     type="password"
                     placeholder="Repeat password"
-                    className="input"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action focus-visible:border-brand-action"
                     autoComplete="new-password"
                   />
                   {errors.confirmPassword && (
-                    <p className="text-xs text-accent-red mt-1">{errors.confirmPassword.message}</p>
+                    <p className="text-xs text-status-ineligible mt-1">{errors.confirmPassword.message}</p>
                   )}
                 </div>
 
-                <button type="submit" disabled={loading} className="btn-primary w-full py-3 gap-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action disabled:opacity-50"
+                >
                   {loading ? 'Creating account...' : (
                     <>Create account <ArrowRight className="w-4 h-4" /></>
                   )}
@@ -279,15 +298,15 @@ export default function RegisterPage() {
               </form>
             </div>
 
-            <p className="text-center text-xs text-text-disabled mt-8 leading-relaxed">
+            <p className="text-center text-xs text-text-secondary mt-8 leading-relaxed">
               By registering, you agree to REXAM's{' '}
-              <Link to="/terms" className="text-text-muted hover:text-text-primary">
+              <Link to="/terms" className="text-brand-action hover:underline">
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link to="/privacy" className="text-text-muted hover:text-text-primary">
+              <Link to="/privacy" className="text-brand-action hover:underline">
                 Privacy Policy
-              </Link>
+              </Link>.
             </p>
           </div>
         </div>

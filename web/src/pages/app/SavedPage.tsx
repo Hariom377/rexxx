@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Bookmark, Compass } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -10,6 +10,7 @@ import { EmptyState } from '../../components/shared/EmptyState'
 
 export default function SavedPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   const { data: savedExams = [], isLoading } = useQuery<ExaminationWithDetails[]>({
@@ -61,33 +62,35 @@ export default function SavedPage() {
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <div className="content-frame max-w-content py-6 tablet:py-8">
-        <div className="mb-6">
-          <h1 className="page-title">Saved Opportunities</h1>
+      <div className="content-frame max-w-content py-6 sm:py-8 space-y-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+            Saved Opportunities
+          </h1>
           <p className="text-sm text-text-secondary mt-1">
-            Keep track of notifications and exams you plan to apply for.
+            Keep track of notifications and examinations you plan to apply for before their closing dates.
           </p>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="card p-6 h-56 skeleton" />
+              <div key={i} className="bg-white border border-border-default rounded-lg p-6 h-56 animate-pulse" />
             ))}
           </div>
         ) : savedExams.length === 0 ? (
           <EmptyState
             icon={Bookmark}
             title="No saved opportunities yet"
-            description="Bookmark jobs and examinations from the discover feed or explorer to view them here."
+            description="Bookmark jobs and examinations from the explorer or discover feed to review and track them here."
             action={
-              <Link to="/explorer" className="btn-primary gap-2">
+              <Link to="/explorer" className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white text-sm font-semibold transition-colors">
                 <Compass className="w-4 h-4" /> Explore Opportunities
               </Link>
             }
           />
         ) : (
-          <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {savedExams.map((exam) => (
               <OpportunityCard
                 key={exam.id}

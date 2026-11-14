@@ -101,7 +101,7 @@ export default function ExplorerPage() {
       const matchesState =
         selectedState === 'All' ||
         exam.location.toLowerCase().includes(selectedState.toLowerCase()) ||
-        exam.state?.toLowerCase() === selectedState.toLowerCase()
+        (exam as any).state?.toLowerCase() === selectedState.toLowerCase()
 
       const matchesTab =
         activeTab === 'all' || eligibleMap.get(exam.id) === true
@@ -113,47 +113,51 @@ export default function ExplorerPage() {
   return (
     <>
       <Helmet>
-        <title>Explorer — Opportunity Catalog | REXAM</title>
+        <title>Explorer — Opportunity Catalogue | REXAM</title>
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <div className="content-frame max-w-content py-6 tablet:py-8">
-        <div className="mb-6">
-          <h1 className="page-title">Opportunity Explorer</h1>
+      <div className="content-frame max-w-content py-6 sm:py-8 space-y-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+            Opportunity Explorer
+          </h1>
           <p className="text-sm text-text-secondary mt-1">
-            Search and filter verified examinations, recruitments and scholarships.
+            Browse and filter verified government examinations, recruitments, and scholarships across India.
           </p>
         </div>
 
         {/* Tab switcher: All vs Eligible */}
-        <div className="flex border-b border-border mb-6">
+        <div className="flex border-b border-border-default">
           <button
+            type="button"
             onClick={() => setActiveTab('all')}
-            className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+            className={`min-h-[44px] pb-3 px-4 text-sm font-semibold border-b-2 transition-colors ${
               activeTab === 'all'
-                ? 'border-accent-green text-accent-green'
-                : 'border-transparent text-text-muted hover:text-text-primary'
+                ? 'border-brand-action text-brand-action'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-slate-300'
             }`}
           >
             All Opportunities ({examinations.length})
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('eligible')}
-            className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
+            className={`min-h-[44px] pb-3 px-4 text-sm font-semibold border-b-2 transition-colors flex items-center gap-1.5 ${
               activeTab === 'eligible'
-                ? 'border-accent-green text-accent-green'
-                : 'border-transparent text-text-muted hover:text-text-primary'
+                ? 'border-brand-action text-brand-action'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:border-slate-300'
             }`}
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
+            <CheckCircle2 className="w-4 h-4 text-status-eligible" />
             Eligible for Me
           </button>
         </div>
 
         {/* Search & Location Bar */}
-        <div className="flex flex-col tablet:flex-row gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <SearchBar
-            placeholder="Search by name, post, ministry or keywords..."
+            placeholder="Search by exam name, post, organization or keywords..."
             value={search}
             onChange={(v) => {
               setSearch(v)
@@ -164,7 +168,8 @@ export default function ExplorerPage() {
           <select
             value={selectedState}
             onChange={(e) => setSelectedState(e.target.value)}
-            className="input tablet:w-56"
+            aria-label="Filter by location"
+            className="min-h-[44px] px-3.5 py-2.5 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action sm:w-56"
           >
             <option value="All">All Locations</option>
             <option value="All India">All India</option>
@@ -175,13 +180,14 @@ export default function ExplorerPage() {
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2">
           <button
+            type="button"
             onClick={() => setSelectedCategory('All')}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+            className={`min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
               selectedCategory === 'All'
-                ? 'bg-accent-green text-bg-primary'
-                : 'bg-bg-elevated text-text-secondary hover:text-text-primary border border-border'
+                ? 'bg-brand-action text-white'
+                : 'bg-white text-text-secondary hover:text-text-primary border border-border-default hover:bg-slate-50'
             }`}
           >
             All Categories
@@ -189,11 +195,12 @@ export default function ExplorerPage() {
           {EXAMINATION_CATEGORIES.map((cat) => (
             <button
               key={cat}
+              type="button"
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+              className={`min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
                 selectedCategory === cat
-                  ? 'bg-accent-green text-bg-primary'
-                  : 'bg-bg-elevated text-text-secondary hover:text-text-primary border border-border'
+                  ? 'bg-brand-action text-white'
+                  : 'bg-white text-text-secondary hover:text-text-primary border border-border-default hover:bg-slate-50'
               }`}
             >
               {cat}
@@ -202,25 +209,25 @@ export default function ExplorerPage() {
         </div>
 
         {/* Results Count */}
-        <div className="text-xs text-text-muted mb-4">
+        <div className="text-xs font-semibold text-text-secondary">
           Found {filtered.length} {filtered.length === 1 ? 'opportunity' : 'opportunities'}
         </div>
 
         {/* Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="card p-6 h-56 skeleton" />
+              <div key={i} className="bg-white border border-border-default rounded-lg p-6 h-56 animate-pulse" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={Compass}
             title="No opportunities match your filter"
-            description="Try relaxing your search terms or category selection."
+            description="Try changing your search terms or category selection to see more results."
           />
         ) : (
-          <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map((exam) => (
               <OpportunityCard
                 key={exam.id}
