@@ -1,5 +1,0 @@
-# Cloudflare Pages SPA fallback rule
-# All routes that don't match a static file are served index.html
-# This enables Flutter web's client-side routing to work correctly
-# when users navigate directly to a URL like /dashboard or /opportunities/:id
-/* /index.html 200
