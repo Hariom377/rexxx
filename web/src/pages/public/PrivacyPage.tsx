@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         <h1 className="text-3xl font-bold text-text-primary mb-4">Privacy Policy</h1>
         <p className="text-xs text-text-muted mb-8">Last Updated: November 2026</p>
 
-        <div className="card p-8 space-y-6 text-sm text-text-secondary leading-relaxed">
+        <div className="card p-6 md:p-8 space-y-6 text-sm text-text-secondary leading-relaxed bg-white border border-border-default rounded-lg">
           <section>
             <h2 className="text-base font-semibold text-text-primary mb-2">1. Overview</h2>
             <p>
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-base font-semibold text-text-primary mb-2">2. Information We Collect</h2>
             <p>
-              To provide deterministic eligibility matching, we collect candidate information provided voluntarily during profile creation, including:
+              To check your eligibility against official examination criteria, we collect candidate information provided voluntarily during profile creation, including:
             </p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>Name, email address, and authentication credentials.</li>
@@ -32,12 +32,15 @@ export default function PrivacyPage() {
               <li>Educational qualifications, graduation year, degrees, percentages/CGPA.</li>
               <li>State of domicile and disability status (PwBD) for applicable statutory relaxations.</li>
             </ul>
+            <p className="mt-2 text-xs text-text-secondary">
+              Sensitive fields (such as category and income) are used exclusively to check eligibility against notification criteria and are never shared or sold.
+            </p>
           </section>
 
           <section>
             <h2 className="text-base font-semibold text-text-primary mb-2">3. How Your Data Is Protected</h2>
             <p>
-              All candidate data is stored using Supabase PostgreSQL with strict Row Level Security (RLS) policies. Your sensitive candidate attributes (such as date of birth, income, and category) are strictly accessible only by your authenticated session. We never sell or share candidate data with third-party advertisers.
+              All candidate data is stored using secure databases with strict Row Level Security (RLS) policies. Your sensitive candidate attributes are accessible only by your authenticated session. We never sell or share candidate data with third-party advertisers.
             </p>
           </section>
 

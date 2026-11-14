@@ -3,18 +3,20 @@ import { Helmet } from 'react-helmet-async'
 import { useQuery } from '@tanstack/react-query'
 import {
   Calendar, MapPin, Users, ExternalLink, ShieldCheck,
-  ArrowLeft, CheckCircle2, AlertCircle, FileText, ChevronRight
+  ArrowLeft, FileText, ChevronRight, AlertCircle, Building2
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import type { ExaminationWithDetails } from '../../types'
+import type { ExaminationWithDetails, CandidateEducation } from '../../types'
 import { formatDate, formatDeadline, getCategoryColor } from '../../lib/utils'
 import { LoadingSpinner } from '../../components/shared/LoadingSpinner'
+import { EligibilityBadge } from '../../components/shared/EligibilityBadge'
 import { useAuth } from '../../contexts/AuthContext'
 
 export default function OpportunityDetailPage() {
   const { slug } = useParams<{ slug: string }>()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
 
+  // 1. Fetch Opportunity Details
   const { data: exam, isLoading, error } = useQuery<ExaminationWithDetails | null>({
     queryKey: ['opportunity-detail', slug],
     queryFn: async () => {
@@ -37,16 +39,30 @@ export default function OpportunityDetailPage() {
     enabled: !!slug,
   })
 
+  // 2. Fetch User Education (if logged in) for comparison table
+  const { data: userEducation = [] } = useQuery<CandidateEducation[]>({
+    queryKey: ['candidate-education-detail', user?.id],
+    queryFn: async () => {
+      if (!user) return []
+      const { data } = await supabase
+        .from('candidate_education')
+        .select('*')
+        .eq('candidate_id', user.id)
+      return (data || []) as CandidateEducation[]
+    },
+    enabled: !!user,
+  })
+
   if (isLoading) {
-    return <LoadingSpinner fullPage label="Loading opportunity details..." />
+    return <LoadingSpinner fullPage label="Loading notification details..." />
   }
 
   if (error || !exam) {
     return (
       <div className="content-frame max-w-content py-16 text-center">
-        <h2 className="text-xl font-bold text-text-primary mb-2">Opportunity Not Found</h2>
+        <h2 className="text-xl font-bold text-text-primary mb-2">Notification Not Found</h2>
         <p className="text-sm text-text-secondary mb-6">
-          The notification you're looking for could not be found or has expired.
+          The opportunity you are looking for could not be found or has expired.
         </p>
         <Link to="/jobs" className="btn-primary">Browse All Opportunities</Link>
       </div>
@@ -58,7 +74,43 @@ export default function OpportunityDetailPage() {
   const dates = exam.examination_dates
   const org = exam.organisations
 
-  // Structured Data JSON-LD (JobPosting)
+  // Calculate age if profile exists
+  let candidateAge: number | null = null
+  let ageRelaxation = 0
+  if (profile?.date_of_birth) {
+    const dob = new Date(profile.date_of_birth)
+    const cutoff = rules?.age_cutoff_date ? new Date(rules.age_cutoff_date) : new Date()
+    let age = cutoff.getFullYear() - dob.getFullYear()
+    const m = cutoff.getMonth() - dob.getMonth()
+    if (m < 0 || (m === 0 && cutoff.getDate() < dob.getDate())) {
+      age--
+    }
+    candidateAge = age
+  }
+
+  if (profile?.social_category === 'SC' || profile?.social_category === 'ST') {
+    ageRelaxation += 5
+  } else if (profile?.social_category === 'OBC-NCL') {
+    ageRelaxation += 3
+  }
+  if (profile?.is_pwbd) {
+    ageRelaxation += 10
+  }
+  const maxAllowedAge = (rules?.max_age || 35) + ageRelaxation
+
+  const isAgeValid = candidateAge !== null && rules
+    ? candidateAge >= rules.min_age && candidateAge <= maxAllowedAge
+    : null
+
+  const requiredQuals = rules?.educational_qualifications || []
+  const highestEdu = userEducation[0]
+  const hasMatchingQual = userEducation.length > 0 && requiredQuals.length > 0
+    ? userEducation.some((e) =>
+        requiredQuals.some((rq) => rq.toLowerCase().includes(e.highest_qualification.toLowerCase()) || e.highest_qualification.toLowerCase().includes(rq.toLowerCase()))
+      )
+    : null
+
+  // Structured Data JSON-LD
   const jobPostingJsonLd = exam.category.includes('Recruitment') || exam.category.includes('Job') ? {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
@@ -68,7 +120,7 @@ export default function OpportunityDetailPage() {
     validThrough: dates?.application_closing_date || undefined,
     hiringOrganization: {
       '@type': 'Organization',
-      name: org?.name || 'Government of India',
+      name: org?.name || 'Government Authority',
       sameAs: org?.website_url || undefined,
     },
     jobLocation: {
@@ -79,24 +131,14 @@ export default function OpportunityDetailPage() {
         addressRegion: exam.state || 'All India',
       },
     },
-    baseSalary: exam.salary_or_pay_scale ? {
-      '@type': 'MonetaryAmount',
-      currency: 'INR',
-      value: {
-        '@type': 'QuantitativeValue',
-        value: exam.salary_or_pay_scale,
-      },
-    } : undefined,
   } : null
 
   return (
     <>
       <Helmet>
-        <title>{exam.name} — Eligibility, Dates & Notification | REXAM</title>
-        <meta name="description" content={exam.overview || `${exam.name} eligibility rules, vacancy details, syllabus, and application deadline.`} />
+        <title>{exam.name} — Eligibility, Dates &amp; Official Notification | REXAM</title>
+        <meta name="description" content={exam.overview || `${exam.name} eligibility rules, vacancy details, and official application deadline.`} />
         <link rel="canonical" href={`https://rexam.in/opportunities/${exam.slug}`} />
-        <meta property="og:title" content={`${exam.name} | REXAM`} />
-        <meta property="og:description" content={exam.overview} />
         {jobPostingJsonLd && (
           <script type="application/ld+json">
             {JSON.stringify(jobPostingJsonLd)}
@@ -104,92 +146,102 @@ export default function OpportunityDetailPage() {
         )}
       </Helmet>
 
-      <div className="content-frame max-w-detail py-8">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-xs text-text-muted mb-6">
-          <Link to="/" className="hover:text-text-primary">Home</Link>
-          <ChevronRight className="w-3 h-3" />
-          <Link to="/jobs" className="hover:text-text-primary">Opportunities</Link>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-text-secondary truncate max-w-xs">{exam.name}</span>
+      <div className="content-frame max-w-detail py-8 pb-28 tablet:pb-12">
+
+        {/* ── Breadcrumb ───────────────────────────────────── */}
+        <nav className="flex items-center gap-1.5 text-xs text-text-secondary mb-4" aria-label="Breadcrumb">
+          <Link to="/" className="hover:text-brand focus-visible:ring-1 focus-visible:ring-brand rounded">Home</Link>
+          <ChevronRight className="w-3.5 h-3.5 text-text-secondary" aria-hidden="true" />
+          <Link to="/jobs" className="hover:text-brand focus-visible:ring-1 focus-visible:ring-brand rounded">Opportunities</Link>
+          <ChevronRight className="w-3.5 h-3.5 text-text-secondary" aria-hidden="true" />
+          <span className="text-text-primary font-medium truncate max-w-xs">{exam.name}</span>
         </nav>
 
         {/* Back Link */}
-        <Link to="/jobs" className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-primary mb-4">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to opportunities
+        <Link
+          to="/jobs"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-text-secondary hover:text-brand mb-6 focus-visible:ring-2 focus-visible:ring-brand rounded p-1"
+        >
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+          <span>Back to all opportunities</span>
         </Link>
 
-        {/* Main Header Card */}
-        <div className="card p-6 tablet:p-8 mb-6">
+        {/* ── Main Header Card ─────────────────────────────── */}
+        <div className="card p-6 tablet:p-8 mb-8 border border-border">
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className={`badge ${getCategoryColor(exam.category)}`}>{exam.category}</span>
+            <span className={`badge ${getCategoryColor(exam.category)}`}>
+              {exam.category}
+            </span>
             {exam.is_official_source && (
-              <span className="badge badge-green flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" /> Official Gazette
+              <span className="verified-badge">
+                <ShieldCheck className="w-3.5 h-3.5 text-status-eligible-text" aria-hidden="true" />
+                <span>Official government notification</span>
               </span>
             )}
-            <span className="text-xs text-text-muted ml-auto">
-              Verified: {formatDate(exam.last_verified_at, 'long')}
+            <span className="text-xs text-text-secondary margin-inline-start-auto">
+              Verified on: {formatDate(exam.last_verified_at, 'long')}
             </span>
           </div>
 
-          <h1 className="text-xl tablet:text-3xl font-bold text-text-primary leading-tight mb-2">
+          <h1 className="text-2xl tablet:text-3xl font-bold text-text-primary leading-tight mb-2">
             {exam.name}
           </h1>
 
           {org?.name && (
-            <p className="text-sm tablet:text-base text-text-secondary font-medium mb-4">
-              {org.name} {org.parent_ministry ? `• ${org.parent_ministry}` : ''}
+            <p className="text-sm tablet:text-base text-text-secondary font-medium mb-6">
+              {org.name} {org.parent_ministry ? `· ${org.parent_ministry}` : ''}
             </p>
           )}
 
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 tablet:grid-cols-4 gap-4 p-4 rounded-xl bg-bg-elevated border border-border mt-6">
+          {/* Quick Metrics Strip */}
+          <div className="grid grid-cols-2 tablet:grid-cols-4 gap-4 p-4 rounded-lg bg-bg-secondary border border-border mb-6">
             <div>
-              <p className="text-2xs text-text-muted uppercase tracking-wider">Vacancies</p>
-              <p className="text-sm font-semibold text-text-primary mt-0.5">
-                {exam.vacancies ? `${exam.vacancies.toLocaleString('en-IN')} Posts` : 'Not specified'}
+              <p className="text-2xs font-semibold uppercase tracking-wider text-text-secondary">Vacancies</p>
+              <p className="text-sm font-bold text-text-primary mt-0.5">
+                {exam.vacancies ? `${exam.vacancies.toLocaleString('en-IN')} Posts` : 'Refer notification'}
               </p>
             </div>
             <div>
-              <p className="text-2xs text-text-muted uppercase tracking-wider">Location</p>
-              <p className="text-sm font-semibold text-text-primary mt-0.5">{exam.location}</p>
+              <p className="text-2xs font-semibold uppercase tracking-wider text-text-secondary">Location</p>
+              <p className="text-sm font-bold text-text-primary mt-0.5">{exam.location}</p>
             </div>
             <div>
-              <p className="text-2xs text-text-muted uppercase tracking-wider">Application Closes</p>
-              <p className={`text-sm font-semibold mt-0.5 ${deadline.urgent ? 'text-accent-red' : 'text-text-primary'}`}>
-                {dates?.application_closing_date ? formatDate(dates.application_closing_date, 'short') : 'TBA'}
+              <p className="text-2xs font-semibold uppercase tracking-wider text-text-secondary">Application Closes</p>
+              <p className={`text-sm font-bold mt-0.5 ${deadline.urgent ? 'text-urgent-text' : 'text-text-primary'}`}>
+                {dates?.application_closing_date ? formatDate(dates.application_closing_date, 'short') : 'Check notice'}
               </p>
             </div>
             <div>
-              <p className="text-2xs text-text-muted uppercase tracking-wider">Salary / Scale</p>
-              <p className="text-sm font-semibold text-text-primary mt-0.5">
-                {exam.salary_or_pay_scale || 'As per Govt Norms'}
+              <p className="text-2xs font-semibold uppercase tracking-wider text-text-secondary">Salary / Pay Scale</p>
+              <p className="text-sm font-bold text-text-primary mt-0.5">
+                {exam.salary_or_pay_scale || 'As per norms'}
               </p>
             </div>
           </div>
 
-          {/* Action CTAs */}
-          <div className="flex flex-wrap gap-3 mt-6">
-            {user ? (
-              <Link to={`/eligibility/${exam.id}`} className="btn-primary flex-1 tablet:flex-none">
-                Check My Exact Eligibility
-              </Link>
-            ) : (
-              <Link to="/register" className="btn-primary flex-1 tablet:flex-none">
-                Sign in to Check Eligibility
-              </Link>
-            )}
-
+          {/* Action Row */}
+          <div className="flex flex-wrap items-center gap-3">
             {exam.official_application_url && (
               <a
                 href={exam.official_application_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-secondary gap-2"
+                className="btn-primary text-sm px-5 py-2.5 gap-2"
               >
-                Official Apply Portal <ExternalLink className="w-4 h-4" />
+                <span>Apply on official website</span>
+                <span className="text-2xs opacity-80">(Opens external site)</span>
+                <ExternalLink className="w-4 h-4" aria-hidden="true" />
               </a>
+            )}
+
+            {user ? (
+              <Link to={`/eligibility/${exam.id}`} className="btn-secondary text-sm px-5 py-2.5">
+                View My Eligibility Report
+              </Link>
+            ) : (
+              <Link to="/register" className="btn-secondary text-sm px-5 py-2.5">
+                Sign in to check eligibility
+              </Link>
             )}
 
             {exam.official_notification_url && (
@@ -197,118 +249,222 @@ export default function OpportunityDetailPage() {
                 href={exam.official_notification_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-ghost gap-2"
+                className="btn-ghost text-sm px-4 py-2.5 gap-1.5"
               >
-                <FileText className="w-4 h-4" /> Notification PDF
+                <FileText className="w-4 h-4 text-text-secondary" aria-hidden="true" />
+                <span>Notification PDF</span>
               </a>
             )}
           </div>
         </div>
 
-        {/* Content Tabs / Sections */}
-        <div className="space-y-6">
-          {/* Overview */}
-          {exam.overview && (
-            <div className="card p-6">
-              <h2 className="section-heading mb-3">Overview & Summary</h2>
-              <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
-                {exam.overview}
-              </p>
-            </div>
-          )}
+        {/* ── Criterion-by-Criterion Table ─────────────────── */}
+        <section className="card p-6 tablet:p-8 mb-8 border border-border">
+          <div className="mb-4">
+            <h2 className="text-lg font-bold text-text-primary">
+              Eligibility Criteria Breakdown
+            </h2>
+            <p className="text-xs text-text-secondary mt-0.5">
+              Comparison between official gazette rules and your candidate profile.
+            </p>
+          </div>
 
-          {/* Eligibility Rules */}
-          {rules && (
-            <div className="card p-6">
-              <h2 className="section-heading mb-4">Eligibility Criteria</h2>
-              <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
-                <div className="p-3.5 rounded-lg bg-bg-elevated border border-border">
-                  <p className="text-xs text-text-muted font-medium mb-1">Age Limits</p>
-                  <p className="text-sm font-semibold text-text-primary">
-                    {rules.min_age} to {rules.max_age} years
-                  </p>
-                  {rules.age_cutoff_date && (
-                    <p className="text-2xs text-text-muted mt-0.5">
-                      Cutoff date: {formatDate(rules.age_cutoff_date, 'long')}
-                    </p>
-                  )}
-                </div>
-
-                <div className="p-3.5 rounded-lg bg-bg-elevated border border-border">
-                  <p className="text-xs text-text-muted font-medium mb-1">Educational Qualification</p>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {rules.educational_qualifications?.length > 0 ? (
-                      rules.educational_qualifications.map((q, i) => (
-                        <span key={i} className="badge badge-blue">{q}</span>
-                      ))
-                    ) : (
-                      <span className="text-sm text-text-secondary">Specified in notification</span>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-border bg-bg-secondary text-xs uppercase font-bold text-text-secondary">
+                  <th className="py-3 px-4">Criterion</th>
+                  <th className="py-3 px-4">Required in Notification</th>
+                  <th className="py-3 px-4">Your Profile</th>
+                  <th className="py-3 px-4">Result</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {/* 1. Age Limit */}
+                <tr>
+                  <td className="py-3 px-4 font-semibold text-text-primary">
+                    Age Limit
+                  </td>
+                  <td className="py-3 px-4 text-text-secondary">
+                    {rules ? `${rules.min_age} to ${rules.max_age} years` : 'Refer notification'}
+                    {rules?.age_cutoff_date && (
+                      <span className="block text-2xs text-text-secondary">
+                        Cutoff: {formatDate(rules.age_cutoff_date, 'short')}
+                      </span>
                     )}
-                  </div>
-                </div>
+                  </td>
+                  <td className="py-3 px-4 text-text-secondary">
+                    {candidateAge !== null ? (
+                      <span>
+                        {candidateAge} years
+                        {ageRelaxation > 0 && ` (+${ageRelaxation}y ${profile?.social_category})`}
+                      </span>
+                    ) : (
+                      <span className="text-text-secondary italic">Date of birth not added</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    {user ? (
+                      <EligibilityBadge
+                        status={isAgeValid}
+                        label={isAgeValid ? 'Eligible' : isAgeValid === false ? 'Overage' : 'Need info'}
+                        size="sm"
+                      />
+                    ) : (
+                      <Link to="/login" className="text-xs text-brand font-semibold hover:underline">
+                        Sign in to check
+                      </Link>
+                    )}
+                  </td>
+                </tr>
 
-                <div className="p-3.5 rounded-lg bg-bg-elevated border border-border">
-                  <p className="text-xs text-text-muted font-medium mb-1">Application Fee</p>
-                  <p className="text-sm font-semibold text-text-primary">
-                    {rules.fee_general ? `₹${rules.fee_general}` : 'No general fee'}
-                  </p>
-                  <p className="text-2xs text-text-muted mt-0.5">{rules.fee_exemptions}</p>
-                </div>
+                {/* 2. Educational Qualification */}
+                <tr>
+                  <td className="py-3 px-4 font-semibold text-text-primary">
+                    Education
+                  </td>
+                  <td className="py-3 px-4 text-text-secondary">
+                    {requiredQuals.length > 0 ? requiredQuals.join(', ') : 'Graduation or as specified'}
+                  </td>
+                  <td className="py-3 px-4 text-text-secondary">
+                    {highestEdu ? highestEdu.highest_qualification : (
+                      <span className="text-text-secondary italic">No degree on profile</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    {user ? (
+                      <EligibilityBadge
+                        status={hasMatchingQual}
+                        label={hasMatchingQual ? 'Eligible' : hasMatchingQual === false ? 'Unmatched' : 'Need info'}
+                        size="sm"
+                      />
+                    ) : (
+                      <Link to="/login" className="text-xs text-brand font-semibold hover:underline">
+                        Sign in to check
+                      </Link>
+                    )}
+                  </td>
+                </tr>
 
-                <div className="p-3.5 rounded-lg bg-bg-elevated border border-border">
-                  <p className="text-xs text-text-muted font-medium mb-1">Nationality & Gender</p>
-                  <p className="text-sm text-text-primary">{rules.nationality} • {rules.gender_requirements}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Important Dates */}
-          {dates && (
-            <div className="card p-6">
-              <h2 className="section-heading mb-4">Important Schedules & Dates</h2>
-              <div className="space-y-3">
-                {dates.notification_date && (
-                  <div className="flex justify-between py-2 border-b border-border/50 text-sm">
-                    <span className="text-text-secondary">Notification Released</span>
-                    <span className="font-medium text-text-primary">{formatDate(dates.notification_date, 'long')}</span>
-                  </div>
-                )}
-                {dates.application_opening_date && (
-                  <div className="flex justify-between py-2 border-b border-border/50 text-sm">
-                    <span className="text-text-secondary">Applications Open</span>
-                    <span className="font-medium text-text-primary">{formatDate(dates.application_opening_date, 'long')}</span>
-                  </div>
-                )}
-                {dates.application_closing_date && (
-                  <div className="flex justify-between py-2 border-b border-border/50 text-sm">
-                    <span className="text-text-secondary">Applications Close</span>
-                    <span className={`font-semibold ${deadline.urgent ? 'text-accent-red' : 'text-text-primary'}`}>
-                      {formatDate(dates.application_closing_date, 'long')}
+                {/* 3. Social Category & Fee */}
+                <tr>
+                  <td className="py-3 px-4 font-semibold text-text-primary">
+                    Application Fee
+                  </td>
+                  <td className="py-3 px-4 text-text-secondary">
+                    {rules?.fee_general ? `₹${rules.fee_general} (General)` : 'No general fee specified'}
+                    <span className="block text-2xs text-text-secondary">{rules?.fee_exemptions}</span>
+                  </td>
+                  <td className="py-3 px-4 text-text-secondary">
+                    {profile?.social_category || 'General'}
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="badge bg-bg-secondary text-text-secondary border-border">
+                      Exemptions apply
                     </span>
-                  </div>
-                )}
-                {dates.examination_start_date && (
-                  <div className="flex justify-between py-2 text-sm">
-                    <span className="text-text-secondary">Examination Date</span>
-                    <span className="font-medium text-text-primary">{formatDate(dates.examination_start_date, 'long')}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+                  </td>
+                </tr>
 
-          {/* Selection & Instructions */}
-          {exam.selection_procedure && (
-            <div className="card p-6">
-              <h2 className="section-heading mb-3">Selection Procedure</h2>
-              <p className="text-sm text-text-secondary whitespace-pre-line leading-relaxed">
-                {exam.selection_procedure}
-              </p>
+                {/* 4. Domicile & Nationality */}
+                <tr>
+                  <td className="py-3 px-4 font-semibold text-text-primary">
+                    Location &amp; Citizenship
+                  </td>
+                  <td className="py-3 px-4 text-text-secondary">
+                    {rules?.nationality || 'Citizen of India'} · {exam.location}
+                  </td>
+                  <td className="py-3 px-4 text-text-secondary">
+                    {profile?.state || 'Indian Citizen'}
+                  </td>
+                  <td className="py-3 px-4">
+                    <EligibilityBadge status="eligible" label="Eligible" size="sm" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* ── Overview & Summary ───────────────────────────── */}
+        {exam.overview && (
+          <section className="card p-6 tablet:p-8 mb-8 border border-border">
+            <h2 className="text-lg font-bold text-text-primary mb-3">
+              Overview &amp; Job Description
+            </h2>
+            <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
+              {exam.overview}
+            </p>
+          </section>
+        )}
+
+        {/* ── Important Schedule Dates ─────────────────────── */}
+        {dates && (
+          <section className="card p-6 tablet:p-8 mb-8 border border-border">
+            <h2 className="text-lg font-bold text-text-primary mb-4">
+              Important Schedules &amp; Key Dates
+            </h2>
+            <div className="space-y-3">
+              {dates.notification_date && (
+                <div className="flex justify-between py-2 border-b border-border text-sm">
+                  <span className="text-text-secondary font-medium">Notification Released</span>
+                  <span className="font-semibold text-text-primary">{formatDate(dates.notification_date, 'long')}</span>
+                </div>
+              )}
+              {dates.application_opening_date && (
+                <div className="flex justify-between py-2 border-b border-border text-sm">
+                  <span className="text-text-secondary font-medium">Application Portal Opens</span>
+                  <span className="font-semibold text-text-primary">{formatDate(dates.application_opening_date, 'long')}</span>
+                </div>
+              )}
+              {dates.application_closing_date && (
+                <div className="flex justify-between py-2 border-b border-border text-sm">
+                  <span className="text-text-secondary font-medium">Last Date to Submit Application</span>
+                  <span className={`font-bold ${deadline.urgent ? 'text-urgent-text' : 'text-text-primary'}`}>
+                    {formatDate(dates.application_closing_date, 'long')}
+                  </span>
+                </div>
+              )}
+              {dates.examination_start_date && (
+                <div className="flex justify-between py-2 text-sm">
+                  <span className="text-text-secondary font-medium">Scheduled Exam Date</span>
+                  <span className="font-semibold text-text-primary">{formatDate(dates.examination_start_date, 'long')}</span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </section>
+        )}
+
+        {/* ── Selection Procedure ──────────────────────────── */}
+        {exam.selection_procedure && (
+          <section className="card p-6 tablet:p-8 border border-border">
+            <h2 className="text-lg font-bold text-text-primary mb-3">
+              Selection Procedure
+            </h2>
+            <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
+              {exam.selection_procedure}
+            </p>
+          </section>
+        )}
+
       </div>
+
+      {/* ── Mobile Sticky Bottom Apply Button ─────────────── */}
+      {exam.official_application_url && (
+        <div className="tablet:hidden fixed bottom-0 left-0 right-0 p-3 bg-bg-primary border-t border-border shadow-elevated z-40">
+          <a
+            href={exam.official_application_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary w-full py-3 text-sm flex items-center justify-center gap-2"
+          >
+            <span>Apply on official website</span>
+            <ExternalLink className="w-4 h-4" aria-hidden="true" />
+          </a>
+          <p className="text-center text-2xs text-text-secondary mt-1">
+            Opens external government application portal
+          </p>
+        </div>
+      )}
     </>
   )
 }
