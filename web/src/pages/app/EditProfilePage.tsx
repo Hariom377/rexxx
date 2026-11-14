@@ -233,14 +233,14 @@ export default function EditProfilePage() {
               <button
                 type="button"
                 onClick={() => navigate('/profile')}
-                className="flex-1 min-h-[44px] inline-flex items-center justify-center px-4 py-2.5 rounded-lg border border-border-default bg-white hover:bg-slate-50 text-sm font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                className="btn-secondary flex-1"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white font-semibold text-sm transition-colors disabled:opacity-50"
+                className="btn-primary flex-1 gap-2"
               >
                 <Save className="w-4 h-4" />
                 {loading ? 'Saving...' : 'Save Profile'}

@@ -189,7 +189,7 @@ export default function ProfileWizardPage() {
                   type="button"
                   onClick={() => setStep(2)}
                   disabled={!fullName.trim() || !dob}
-                  className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white font-semibold text-sm transition-colors disabled:opacity-50 mt-4"
+                  className="btn-primary w-full gap-2 mt-4"
                 >
                   Continue <ArrowRight className="w-4 h-4" />
                 </button>
@@ -201,7 +201,7 @@ export default function ProfileWizardPage() {
               <div className="space-y-5">
                 <div className="border-b border-border-default pb-3">
                   <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-brand-action" /> 2. Domicile & Category
+                    <ShieldCheck className="w-4 h-4 text-brand" /> 2. Domicile & Category
                   </h2>
                   <p className="text-xs text-text-secondary mt-0.5">
                     Used to apply statutory age and fee relaxations per official government reservation rules.
@@ -230,7 +230,7 @@ export default function ProfileWizardPage() {
                     id="wizard-category"
                     value={socialCategory}
                     onChange={(e) => setSocialCategory(e.target.value)}
-                    className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                   >
                     {SOCIAL_CATEGORIES.map((c) => (
                       <option key={c} value={c}>{c}</option>
@@ -242,12 +242,12 @@ export default function ProfileWizardPage() {
                 </div>
 
                 <div>
-                  <label className="flex items-start gap-3 p-3.5 rounded-lg border border-border-default bg-bg-alternate cursor-pointer">
+                  <label className="flex items-start gap-3 p-3.5 rounded-lg border border-border-default bg-bg-secondary cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isPwbd}
                       onChange={(e) => setIsPwbd(e.target.checked)}
-                      className="w-4 h-4 mt-0.5 rounded text-brand-action focus:ring-brand-action"
+                      className="w-4 h-4 mt-0.5 rounded text-brand focus:ring-brand"
                     />
                     <div>
                       <span className="text-sm font-semibold text-text-primary block">
@@ -264,14 +264,14 @@ export default function ProfileWizardPage() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg border border-border-default bg-white hover:bg-slate-50 text-sm font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                    className="btn-secondary flex-1 gap-1.5"
                   >
                     <ArrowLeft className="w-4 h-4" /> Back
                   </button>
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white font-semibold text-sm transition-colors"
+                    className="btn-primary flex-1 gap-2"
                   >
                     Continue <ArrowRight className="w-4 h-4" />
                   </button>
@@ -337,14 +337,14 @@ export default function ProfileWizardPage() {
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg border border-border-default bg-white hover:bg-slate-50 text-sm font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                    className="btn-secondary flex-1 gap-1.5"
                   >
                     <ArrowLeft className="w-4 h-4" /> Back
                   </button>
                   <button
                     type="button"
                     onClick={() => setStep(4)}
-                    className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white font-semibold text-sm transition-colors"
+                    className="btn-primary flex-1 gap-2"
                   >
                     Continue <ArrowRight className="w-4 h-4" />
                   </button>
@@ -357,7 +357,7 @@ export default function ProfileWizardPage() {
               <div className="space-y-5">
                 <div className="border-b border-border-default pb-3">
                   <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4 text-brand-action" /> 4. Academic Year
+                    <GraduationCap className="w-4 h-4 text-brand" /> 4. Academic Year
                   </h2>
                   <p className="text-xs text-text-secondary mt-0.5">
                     Checks whether you meet passing year eligibility (final year appearing vs already completed).
@@ -375,7 +375,7 @@ export default function ProfileWizardPage() {
                     onChange={(e) => setGradYear(parseInt(e.target.value) || new Date().getFullYear())}
                     min={1980}
                     max={new Date().getFullYear() + 6}
-                    className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-text-primary bg-white border border-border-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                   />
                   <p className="text-xs text-text-secondary mt-1">
                     Used only to check eligibility for recruitments with batch-specific requirements.
@@ -386,14 +386,14 @@ export default function ProfileWizardPage() {
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg border border-border-default bg-white hover:bg-slate-50 text-sm font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                    className="btn-secondary flex-1 gap-1.5"
                   >
                     <ArrowLeft className="w-4 h-4" /> Back
                   </button>
                   <button
                     type="button"
                     onClick={() => setStep(5)}
-                    className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white font-semibold text-sm transition-colors"
+                    className="btn-primary flex-1 gap-2"
                   >
                     Continue <ArrowRight className="w-4 h-4" />
                   </button>
@@ -406,7 +406,7 @@ export default function ProfileWizardPage() {
               <div className="space-y-5">
                 <div className="border-b border-border-default pb-3">
                   <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                    <Compass className="w-4 h-4 text-brand-action" /> 5. Opportunity Preferences
+                    <Compass className="w-4 h-4 text-brand" /> 5. Opportunity Preferences
                   </h2>
                   <p className="text-xs text-text-secondary mt-0.5">
                     Select the categories of opportunities you are looking for:
@@ -423,12 +423,12 @@ export default function ProfileWizardPage() {
                         onClick={() => toggleCategory(cat)}
                         className={`min-h-[44px] p-3 rounded-lg border text-left text-xs font-semibold flex items-center justify-between transition-colors ${
                           isSelected
-                            ? 'bg-blue-50 border-brand-action text-brand-action'
+                            ? 'bg-blue-50 border-brand text-brand'
                             : 'bg-white border-border-default text-text-secondary hover:bg-slate-50 hover:text-text-primary'
                         }`}
                       >
                         <span className="pr-2">{cat}</span>
-                        {isSelected && <Check className="w-4 h-4 flex-shrink-0 text-brand-action" />}
+                        {isSelected && <Check className="w-4 h-4 flex-shrink-0 text-brand" />}
                       </button>
                     )
                   })}
@@ -438,7 +438,7 @@ export default function ProfileWizardPage() {
                   <button
                     type="button"
                     onClick={() => setStep(4)}
-                    className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg border border-border-default bg-white hover:bg-slate-50 text-sm font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                    className="btn-secondary flex-1 gap-1.5"
                   >
                     <ArrowLeft className="w-4 h-4" /> Back
                   </button>
@@ -446,7 +446,7 @@ export default function ProfileWizardPage() {
                     type="button"
                     onClick={handleFinish}
                     disabled={loading}
-                    className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white font-semibold text-sm transition-colors disabled:opacity-50"
+                    className="btn-primary flex-1 gap-2"
                   >
                     <Sparkles className="w-4 h-4" />
                     {loading ? 'Saving Profile...' : 'Complete & Open Dashboard'}

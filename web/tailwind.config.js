@@ -32,6 +32,12 @@ export default {
           hover: '#1E40AF',        // Hover state
           light: '#EFF6FF',        // Subtle brand background
           subtle: '#DBEAFE',       // Brand tint border
+          action: '#1D4ED8',
+          'action-hover': '#1E40AF',
+        },
+        'brand-action': {
+          DEFAULT: '#1D4ED8',
+          hover: '#1E40AF',
         },
         // Urgent Deadline (Amber)
         urgent: {

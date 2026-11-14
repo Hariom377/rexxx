@@ -217,7 +217,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action disabled:opacity-50"
+                  className="btn-primary w-full gap-2"
                 >
                   {loading ? 'Signing in...' : (
                     <>Sign in <ArrowRight className="w-4 h-4" /></>
