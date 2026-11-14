@@ -1,15 +1,9 @@
 import { useState } from 'react'
 import { Outlet, Link, NavLink, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import { Shield, Menu, X, AlertCircle } from 'lucide-react'
 import { LanguageSwitcher } from '../components/shared/LanguageSwitcher'
-
-const NAV_LINKS = [
-  { to: '/jobs', label: 'Govt Jobs' },
-  { to: '/exams', label: 'National Exams' },
-  { to: '/scholarships', label: 'Scholarships' },
-  { to: '/about', label: 'About' },
-]
 
 const TRACKED_ORGANISATIONS = [
   'UPSC',
@@ -27,7 +21,15 @@ const TRACKED_ORGANISATIONS = [
 export default function PublicLayout() {
   const { user } = useAuth()
   const location = useLocation()
+  const { t } = useTranslation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const navLinks = [
+    { to: '/jobs', label: t('nav.jobs') },
+    { to: '/exams', label: t('nav.exams') },
+    { to: '/scholarships', label: t('nav.scholarships') },
+    { to: '/about', label: t('nav.about') },
+  ]
 
   return (
     <div className="min-h-screen bg-bg-primary flex flex-col text-text-primary">
@@ -37,7 +39,7 @@ export default function PublicLayout() {
         <div className="content-frame max-w-content flex flex-col tablet:flex-row tablet:items-center tablet:justify-between gap-1">
           <div className="flex items-center gap-1.5 font-medium text-text-primary">
             <AlertCircle className="w-3.5 h-3.5 text-brand flex-shrink-0" aria-hidden="true" />
-            <span>REXAM is an independent student platform, not a government website. Always verify on official notifications.</span>
+            <span>{t('disclaimer.top_banner')}</span>
           </div>
           <div className="flex items-center gap-2 text-text-secondary">
             <span>Updated daily from official government and public-body websites</span>
@@ -60,7 +62,7 @@ export default function PublicLayout() {
 
           {/* Desktop Nav */}
           <nav className="hidden desktop:flex items-center gap-1" aria-label="Main Navigation">
-            {NAV_LINKS.map(({ to, label }) => (
+            {navLinks.map(({ to, label }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -83,7 +85,7 @@ export default function PublicLayout() {
 
             {user ? (
               <Link to="/discover" className="btn-primary text-sm py-2 px-4 hidden tablet:inline-flex">
-                Dashboard
+                {t('nav.dashboard')}
               </Link>
             ) : (
               <>
@@ -92,10 +94,10 @@ export default function PublicLayout() {
                   state={{ from: { pathname: location.pathname } }}
                   className="btn-secondary text-sm py-2 px-3.5 hidden tablet:inline-flex"
                 >
-                  Sign in
+                  {t('nav.sign_in')}
                 </Link>
                 <Link to="/register" className="btn-primary text-sm py-2 px-4 hidden tablet:inline-flex">
-                  Get started free
+                  {t('nav.get_started')}
                 </Link>
               </>
             )}
@@ -117,7 +119,7 @@ export default function PublicLayout() {
         {mobileMenuOpen && (
           <div className="desktop:hidden border-t border-border bg-bg-primary px-4 py-4 space-y-3">
             <nav className="flex flex-col space-y-1" aria-label="Mobile Navigation">
-              {NAV_LINKS.map(({ to, label }) => (
+              {navLinks.map(({ to, label }) => (
                 <NavLink
                   key={to}
                   to={to}
@@ -140,7 +142,7 @@ export default function PublicLayout() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="btn-primary w-full text-center"
                 >
-                  Go to Dashboard
+                  {t('nav.dashboard')}
                 </Link>
               ) : (
                 <>
@@ -149,14 +151,14 @@ export default function PublicLayout() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="btn-primary w-full text-center"
                   >
-                    Get started free
+                    {t('nav.get_started')}
                   </Link>
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
                     className="btn-secondary w-full text-center"
                   >
-                    Sign in
+                    {t('nav.sign_in')}
                   </Link>
                 </>
               )}

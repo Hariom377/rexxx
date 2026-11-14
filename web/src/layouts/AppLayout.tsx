@@ -4,19 +4,12 @@ import {
   Bell, Settings, LogOut, ChevronRight, Menu, X
 } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import { getInitials } from '../lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { LanguageSwitcher } from '../components/shared/LanguageSwitcher'
-
-const NAV_ITEMS = [
-  { to: '/discover', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/explorer', icon: Compass, label: 'Explorer' },
-  { to: '/saved', icon: Bookmark, label: 'Saved' },
-  { to: '/applications', icon: FileText, label: 'Applications' },
-  { to: '/profile', icon: User, label: 'Profile' },
-]
 
 function NavItem({
   to,
@@ -57,8 +50,17 @@ function NavItem({
 
 export default function AppLayout() {
   const { user, profile, signOut } = useAuth()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const navItems = [
+    { to: '/discover', icon: LayoutDashboard, label: t('nav.dashboard') },
+    { to: '/explorer', icon: Compass, label: t('nav.explorer') },
+    { to: '/saved', icon: Bookmark, label: t('nav.saved') },
+    { to: '/applications', icon: FileText, label: t('nav.applications') },
+    { to: '/profile', icon: User, label: t('nav.profile') },
+  ]
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ['unread-notifications', user?.id],
@@ -103,7 +105,7 @@ export default function AppLayout() {
 
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto" aria-label="Sidebar Navigation">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <NavItem key={item.to} {...item} />
           ))}
 
@@ -111,10 +113,10 @@ export default function AppLayout() {
             <NavItem
               to="/alerts"
               icon={Bell}
-              label="Alerts"
+              label={t('nav.alerts', 'Alerts')}
               badge={unreadCount}
             />
-            <NavItem to="/settings" icon={Settings} label="Settings" />
+            <NavItem to="/settings" icon={Settings} label={t('nav.settings', 'Settings')} />
           </div>
         </nav>
 
@@ -148,7 +150,7 @@ export default function AppLayout() {
             className="w-full mt-2 min-h-[44px] flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text-secondary hover:text-status-ineligible-text hover:bg-status-ineligible-bg transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Sign out</span>
+            <span>{t('nav.sign_out', 'Sign out')}</span>
           </button>
         </div>
       </aside>
@@ -183,12 +185,12 @@ export default function AppLayout() {
             </div>
 
             <nav className="flex-1 p-3 space-y-1 overflow-y-auto" aria-label="Mobile Navigation">
-              {NAV_ITEMS.map((item) => (
+              {navItems.map((item) => (
                 <NavItem key={item.to} {...item} onClick={() => setMobileMenuOpen(false)} />
               ))}
               <div className="pt-3 mt-2 border-t border-border space-y-1">
-                <NavItem to="/alerts" icon={Bell} label="Alerts" badge={unreadCount} onClick={() => setMobileMenuOpen(false)} />
-                <NavItem to="/settings" icon={Settings} label="Settings" onClick={() => setMobileMenuOpen(false)} />
+                <NavItem to="/alerts" icon={Bell} label={t('nav.alerts', 'Alerts')} badge={unreadCount} onClick={() => setMobileMenuOpen(false)} />
+                <NavItem to="/settings" icon={Settings} label={t('nav.settings', 'Settings')} onClick={() => setMobileMenuOpen(false)} />
               </div>
             </nav>
 
@@ -260,7 +262,7 @@ export default function AppLayout() {
           className="desktop:hidden grid grid-cols-5 border-t border-border bg-bg-primary flex-shrink-0 shadow-sm"
           aria-label="Bottom Navigation"
         >
-          {[...NAV_ITEMS, { to: '/alerts', icon: Bell, label: 'Alerts' }].slice(0, 5).map(({ to, icon: Icon, label }) => (
+          {[...navItems, { to: '/alerts', icon: Bell, label: t('nav.alerts', 'Alerts') }].slice(0, 5).map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}

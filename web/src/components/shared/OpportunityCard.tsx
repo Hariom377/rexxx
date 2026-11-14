@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Calendar, MapPin, Users, Bookmark, BookmarkCheck, ArrowRight, Shield } from 'lucide-react'
 import type { ExaminationWithDetails } from '../../types'
 import { formatDate, formatDeadline, getCategoryColor, cn } from '../../lib/utils'
@@ -21,6 +22,7 @@ export function OpportunityCard({
   onToggleSave,
   variant = 'default',
 }: OpportunityCardProps) {
+  const { t } = useTranslation()
   const deadline = formatDeadline(exam.examination_dates?.application_closing_date)
   const categoryColor = getCategoryColor(exam.category)
 
@@ -135,7 +137,7 @@ export function OpportunityCard({
           {exam.vacancies && (
             <span className="inline-flex items-center gap-1.5 font-medium text-text-primary">
               <Users className="w-3.5 h-3.5 text-text-secondary" aria-hidden="true" />
-              {exam.vacancies.toLocaleString('en-IN')} posts
+              {exam.vacancies.toLocaleString('en-IN')} {t('common.vacancies')}
             </span>
           )}
           <span className="inline-flex items-center gap-1.5">
@@ -155,7 +157,7 @@ export function OpportunityCard({
               <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
               {deadline.expired
                 ? 'Closed'
-                : `Last date: ${formatDate(exam.examination_dates.application_closing_date, 'short')}`}
+                : `${t('common.last_date')}: ${formatDate(exam.examination_dates.application_closing_date, 'short')}`}
             </span>
           )}
         </div>
@@ -167,7 +169,7 @@ export function OpportunityCard({
           to={`/opportunities/${exam.slug}`}
           className="inline-flex items-center justify-between w-full min-h-[44px] text-sm font-semibold text-brand hover:text-brand-hover focus-visible:ring-2 focus-visible:ring-brand rounded"
         >
-          <span>View details &amp; eligibility</span>
+          <span>{t('common.view_details')}</span>
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
       </div>

@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HelmetProvider } from 'react-helmet-async'
 import App from './App'
+import './lib/i18n'
 
 // Self-hosted fonts via Fontsource (Latin and Devanagari subsets)
 import '@fontsource/noto-sans/400.css'

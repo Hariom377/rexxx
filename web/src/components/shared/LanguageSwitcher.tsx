@@ -1,10 +1,7 @@
-import { useState, useEffect } from 'react'
-import { Globe, Check } from 'lucide-react'
-
-const LANGUAGES = [
-  { code: 'en', label: 'English', nativeName: 'English' },
-  { code: 'hi', label: 'Hindi', nativeName: 'हिन्दी' },
-]
+import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Globe, Check, ChevronDown } from 'lucide-react'
+import { SUPPORTED_LANGUAGES } from '../../lib/i18n'
 
 interface LanguageSwitcherProps {
   className?: string
@@ -12,62 +9,88 @@ interface LanguageSwitcherProps {
 }
 
 export function LanguageSwitcher({ className = '', compact = false }: LanguageSwitcherProps) {
-  const [currentLang, setCurrentLang] = useState<string>('en')
+  const { i18n } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Current language code (normalized to 2-letter, e.g., 'en-US' -> 'en')
+  const currentLang = (i18n.language || 'en').split('-')[0]
 
   useEffect(() => {
-    const saved = localStorage.getItem('rexam_lang') || 'en'
-    setCurrentLang(saved)
-    document.documentElement.lang = saved
-  }, [])
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
 
   const handleSelect = (code: string) => {
-    setCurrentLang(code)
+    i18n.changeLanguage(code)
     localStorage.setItem('rexam_lang', code)
-    document.documentElement.lang = code
-    window.dispatchEvent(new Event('languagechange'))
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = code
+    }
     setIsOpen(false)
   }
 
-  const activeLangObj = LANGUAGES.find((l) => l.code === currentLang) || LANGUAGES[0]
+  const activeLangObj =
+    SUPPORTED_LANGUAGES.find((l) => l.code === currentLang) || SUPPORTED_LANGUAGES[0]
 
   return (
-    <div className={`relative inline-block ${className}`}>
+    <div ref={containerRef} className={`relative inline-block ${className}`}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        aria-label="Select language"
-        className="min-h-[44px] px-3 py-2 inline-flex items-center gap-2 rounded-lg border border-border bg-bg-primary text-text-primary text-sm font-medium hover:bg-bg-secondary focus-visible:ring-2 focus-visible:ring-brand"
+        aria-label="Select interface language"
+        className="min-h-[44px] px-3 py-2 inline-flex items-center gap-2 rounded-lg border border-border-default bg-white text-text-primary text-sm font-semibold hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action transition-colors"
       >
         <Globe className="w-4 h-4 text-text-secondary" aria-hidden="true" />
         <span>{compact ? activeLangObj.code.toUpperCase() : activeLangObj.nativeName}</span>
+        <ChevronDown className="w-3.5 h-3.5 text-text-secondary" aria-hidden="true" />
       </button>
 
       {isOpen && (
         <div
           role="listbox"
-          aria-label="Languages"
-          className="absolute right-0 mt-1.5 w-36 bg-bg-card border border-border-strong rounded-lg shadow-elevated py-1 z-50"
+          aria-label="Supported Languages"
+          className="absolute right-0 mt-1.5 w-48 max-h-72 overflow-y-auto bg-white border border-border-default rounded-lg shadow-md py-1 z-50 divide-y divide-border-default/50"
         >
-          {LANGUAGES.map((lang) => {
+          {SUPPORTED_LANGUAGES.map((lang) => {
             const isSelected = lang.code === currentLang
+            const isComingSoon = 'comingSoon' in lang && lang.comingSoon
+
             return (
               <button
                 key={lang.code}
                 type="button"
                 role="option"
                 aria-selected={isSelected}
-                onClick={() => handleSelect(lang.code)}
-                className={`w-full min-h-[44px] px-3 py-2 text-left text-sm flex items-center justify-between transition-colors ${
+                disabled={isComingSoon}
+                onClick={() => !isComingSoon && handleSelect(lang.code)}
+                className={`w-full min-h-[40px] px-3.5 py-2 text-left text-sm flex items-center justify-between transition-colors ${
                   isSelected
-                    ? 'bg-brand-light text-brand font-semibold'
-                    : 'text-text-primary hover:bg-bg-secondary'
+                    ? 'bg-blue-50 text-brand-action font-bold'
+                    : isComingSoon
+                    ? 'text-text-secondary/50 cursor-not-allowed bg-slate-50/50'
+                    : 'text-text-primary hover:bg-slate-50 font-medium'
                 }`}
               >
-                <span>{lang.nativeName}</span>
-                {isSelected && <Check className="w-4 h-4 text-brand" />}
+                <div>
+                  <span className="block leading-tight">{lang.nativeName}</span>
+                  <span className="text-2xs text-text-secondary block font-normal">{lang.label}</span>
+                </div>
+                {isSelected && <Check className="w-4 h-4 text-brand-action flex-shrink-0" />}
+                {isComingSoon && (
+                  <span className="text-2xs text-text-secondary/60 uppercase">Soon</span>
+                )}
               </button>
             )
           })}
