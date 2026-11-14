@@ -7,9 +7,17 @@ interface SearchBarProps {
   onChange?: (value: string) => void
   onSearch?: (value: string) => void
   className?: string
+  ariaLabel?: string
 }
 
-export function SearchBar({ placeholder = 'Search opportunities...', value, onChange, onSearch, className }: SearchBarProps) {
+export function SearchBar({
+  placeholder = 'Search by exam, department or keyword...',
+  value,
+  onChange,
+  onSearch,
+  className = '',
+  ariaLabel = 'Search opportunities',
+}: SearchBarProps) {
   const [localValue, setLocalValue] = useState(value || '')
 
   const handleChange = (v: string) => {
@@ -24,25 +32,40 @@ export function SearchBar({ placeholder = 'Search opportunities...', value, onCh
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') onSearch?.(localValue)
+    if (e.key === 'Enter') {
+      onSearch?.(localValue)
+    }
   }
 
   const displayValue = value !== undefined ? value : localValue
 
   return (
-    <div className={`relative ${className}`}>
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+    <div className={`relative w-full ${className}`}>
+      <label htmlFor="search-opportunities-input" className="sr-only">
+        {ariaLabel}
+      </label>
+      <Search
+        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none"
+        aria-hidden="true"
+      />
       <input
+        id="search-opportunities-input"
         type="search"
         value={displayValue}
         onChange={(e) => handleChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="input pl-9 pr-9"
+        aria-label={ariaLabel}
+        className="input pl-10 pr-10 text-base"
       />
       {displayValue && (
-        <button onClick={handleClear} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary">
-          <X className="w-3.5 h-3.5" />
+        <button
+          type="button"
+          onClick={handleClear}
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center text-text-secondary hover:text-text-primary rounded-md focus-visible:ring-2 focus-visible:ring-brand"
+          aria-label="Clear search text"
+        >
+          <X className="w-4 h-4" />
         </button>
       )}
     </div>
