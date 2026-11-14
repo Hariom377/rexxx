@@ -1,5 +1,0 @@
-/*
-  REXAM SPA fallback for Cloudflare Pages
-  Routes all requests to index.html, allowing React Router to handle navigation.
-*/
-/* /index.html 200
