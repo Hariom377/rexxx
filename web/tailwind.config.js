@@ -4,40 +4,43 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Theme: Light mode only, high contrast, WCAG 2.2 AA compliant
+        // Theme: Warm natural light mode with deep forest green brand (matching REXAM showcase)
         bg: {
-          primary: '#FFFFFF',      // Page background
-          secondary: '#F8FAFC',    // Alternate sections, panels
-          card: '#FFFFFF',         // Card surfaces
-          elevated: '#F1F5F9',     // Dropdowns, input backgrounds, subtle pills
-          hover: '#E2E8F0',        // Hover state on elevated elements
-          alt: '#F8FAFC',          // Alternate background
+          primary: '#FBFBFA',      // Warm natural off-white page background
+          secondary: '#F4F3EE',    // Warm alternate sections, panels
+          card: '#FFFFFF',         // Crisp white card surfaces
+          elevated: '#EFEFEA',     // Dropdowns, input backgrounds, subtle pills
+          hover: '#E5E4DE',        // Hover state on elevated elements
+          alt: '#F4F3EE',          // Alternate background
+          forest: '#143826',       // Deep forest green container
         },
         border: {
-          DEFAULT: '#E2E8F0',      // Standard border
-          subtle: '#F1F5F9',       // Hairline borders
-          strong: '#CBD5E1',       // High-contrast emphasis borders
-          accent: '#1D4ED830',     // Subtle brand-tinted border
+          DEFAULT: '#E6E4DE',      // Soft warm border
+          subtle: '#EFEFEA',       // Hairline borders
+          strong: '#D1CFCA',       // High-contrast emphasis borders
+          accent: '#183D2B25',     // Subtle brand-tinted border
         },
         text: {
-          primary: '#0F172A',      // Primary headings & body (15.6:1 on white)
-          secondary: '#475569',    // Subheadings, labels, secondary body (5.4:1 on white)
-          muted: '#475569',        // Metadata, timestamps (never lighter than #475569 on white)
-          disabled: '#64748B',     // Form disabled text
+          primary: '#111827',      // Deep charcoal/black headings & body (16:1 contrast)
+          secondary: '#575653',    // Warm muted gray subheadings & metadata (5.5:1 contrast)
+          muted: '#6E6D68',        // Metadata, timestamps
+          disabled: '#9E9D97',     // Form disabled text
           inverse: '#FFFFFF',      // White text on dark/brand buttons
         },
-        // Brand & Primary Action (Blue #1D4ED8)
+        // Brand & Primary Action (Deep Forest Green #183D2B)
         brand: {
-          DEFAULT: '#1D4ED8',      // Primary action button & links
-          hover: '#1E40AF',        // Hover state
-          light: '#EFF6FF',        // Subtle brand background
-          subtle: '#DBEAFE',       // Brand tint border
-          action: '#1D4ED8',
-          'action-hover': '#1E40AF',
+          DEFAULT: '#183D2B',      // Primary action button & links
+          hover: '#102B1E',        // Deep forest hover state
+          active: '#0B1E15',
+          light: '#EBF3EC',        // Soft mint/sage tint
+          subtle: '#D5E4D8',       // Brand tint border
+          action: '#183D2B',
+          'action-hover': '#102B1E',
+          forest: '#143826',
         },
         'brand-action': {
-          DEFAULT: '#1D4ED8',
-          hover: '#1E40AF',
+          DEFAULT: '#183D2B',
+          hover: '#102B1E',
         },
         // Urgent Deadline (Amber)
         urgent: {
@@ -111,19 +114,21 @@ export default {
         tight: '1.25',
       },
       borderRadius: {
-        DEFAULT: '8px',
-        card: '8px',
-        button: '8px',
-        input: '8px',
+        DEFAULT: '10px',
+        card: '12px',
+        button: '10px',
+        input: '10px',
         pill: '9999px',
         sm: '6px',
-        md: '8px',
-        lg: '8px',
+        md: '10px',
+        lg: '12px',
+        xl: '16px',
+        '2xl': '20px',
       },
       boxShadow: {
         none: 'none',
-        card: '0 1px 2px 0 rgba(15, 23, 42, 0.04), 0 0 0 1px #E2E8F0',
-        elevated: '0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05)',
+        card: '0 1px 3px 0 rgba(20, 20, 20, 0.04), 0 0 0 1px #E6E4DE',
+        elevated: '0 4px 12px -2px rgba(24, 61, 43, 0.06)',
       },
       maxWidth: {
         content: '1200px',
