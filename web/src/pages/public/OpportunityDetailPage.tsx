@@ -11,6 +11,7 @@ import { formatDate, formatDeadline, getCategoryColor } from '../../lib/utils'
 import { LoadingSpinner } from '../../components/shared/LoadingSpinner'
 import { EligibilityBadge } from '../../components/shared/EligibilityBadge'
 import { useAuth } from '../../contexts/AuthContext'
+import { calculateAge, isAgeEligible, isEducationEligible } from '../../lib/eligibility'
 
 export default function OpportunityDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -99,18 +100,16 @@ export default function OpportunityDetailPage() {
   const maxAllowedAge = (rules?.max_age || 35) + ageRelaxation
 
   const isAgeValid = candidateAge !== null && rules
-    ? candidateAge >= rules.min_age && candidateAge <= maxAllowedAge
+    ? isAgeEligible(candidateAge, rules.min_age, rules.max_age, ageRelaxation)
     : null
 
   const requiredQuals = rules?.educational_qualifications || []
   const highestEdu = userEducation[0]
   const hasMatchingQual = userEducation.length > 0 && requiredQuals.length > 0
-    ? userEducation.some((e) =>
-        requiredQuals.some((rq) => rq.toLowerCase().includes(e.highest_qualification.toLowerCase()) || e.highest_qualification.toLowerCase().includes(rq.toLowerCase()))
-      )
+    ? isEducationEligible(userEducation, requiredQuals)
     : null
 
-  // Structured Data JSON-LD
+  // Structured Data JSON-LD for Google & Gemini AI Overviews
   const jobPostingJsonLd = exam.category.includes('Recruitment') || exam.category.includes('Job') ? {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
@@ -131,7 +130,82 @@ export default function OpportunityDetailPage() {
         addressRegion: exam.state || 'All India',
       },
     },
+    qualifications: requiredQuals.join('; ') || undefined,
   } : null
+
+  // FAQ Schema: Heavily rewarded by Google and Gemini Search for Instant Answers
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: `What is the educational qualification for ${exam.name}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: requiredQuals.length > 0
+            ? requiredQuals.join('. ')
+            : `Candidates should refer to the official notification published by ${org?.name || 'the examination authority'}.`,
+        },
+      },
+      {
+        '@type': 'Question',
+        name: `What is the age limit for ${exam.name}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: rules
+            ? `The minimum age is ${rules.min_age} years and maximum age is ${rules.max_age} years. Statutory age relaxations apply for SC/ST (+5 years), OBC-NCL (+3 years), and PwBD (+10 years) per Government of India rules.`
+            : 'Please refer to the official notification for cutoff date and age criteria.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: `What is the last date to apply for ${exam.name}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: dates?.application_closing_date
+            ? `The last date to submit the application form is ${formatDate(dates.application_closing_date, 'long')}.`
+            : 'The closing date will be announced in the official examination calendar.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: `How many vacancies are announced for ${exam.name}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: exam.vacancies
+            ? `A total of ${exam.vacancies.toLocaleString('en-IN')} vacancies have been notified.`
+            : 'Vacancies are notified per the official notification breakdown.',
+        },
+      },
+    ],
+  }
+
+  // Breadcrumbs Schema for Google Search Snippets
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://rexam.in',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: exam.category,
+        item: 'https://rexam.in/jobs',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: exam.name,
+        item: `https://rexam.in/opportunities/${exam.slug}`,
+      },
+    ],
+  }
 
   return (
     <>
@@ -144,6 +218,12 @@ export default function OpportunityDetailPage() {
             {JSON.stringify(jobPostingJsonLd)}
           </script>
         )}
+        <script type="application/ld+json">
+          {JSON.stringify(faqJsonLd)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbJsonLd)}
+        </script>
       </Helmet>
 
       <div className="content-frame max-w-detail py-8 pb-28 tablet:pb-12">

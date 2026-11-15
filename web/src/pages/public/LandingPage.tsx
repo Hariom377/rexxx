@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
+import { useTranslation } from 'react-i18next'
 import {
   ArrowRight, CheckCircle2, Shield, Search,
   Bell, Building2, GraduationCap, Award, Check, FileText
@@ -69,6 +70,7 @@ const CATEGORIES = [
 ]
 
 export default function LandingPage() {
+  const { t } = useTranslation()
   const { data: featuredExams = [] } = useQuery<ExaminationWithDetails[]>({
     queryKey: ['public-featured-exams'],
     queryFn: async () => {
@@ -91,10 +93,10 @@ export default function LandingPage() {
   return (
     <>
       <Helmet>
-        <title>REXAM — Government Exams, Recruitments &amp; Scholarships Discovery</title>
+        <title>{t('meta.site_title')}</title>
         <meta
           name="description"
-          content="Find government job notifications, competitive exams and scholarships personalized for Indian students and graduates based on your education and state."
+          content={t('meta.site_description')}
         />
         <link rel="canonical" href="https://rexam.in" />
       </Helmet>
@@ -109,17 +111,15 @@ export default function LandingPage() {
               {/* Dynamic Freshness Notice */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-bg-secondary border border-border text-xs text-text-secondary font-medium mb-6">
                 <span className="w-2 h-2 rounded-full bg-status-eligible-text" aria-hidden="true" />
-                <span>Updated daily · {todayFormatted} · 18 official sources</span>
+                <span>{t('home.hero_freshness')} · {todayFormatted}</span>
               </div>
 
               <h1 className="text-3xl tablet:text-5xl font-bold text-text-primary leading-tight mb-5 tracking-normal">
-                Every government exam{' '}
-                <span className="text-brand">you can actually apply for.</span>
+                {t('home.hero_title')}
               </h1>
 
               <p className="text-base tablet:text-lg text-text-secondary leading-relaxed max-w-xl mb-8">
-                Stop reading 60-page notification PDFs only to find you are 2 months overage or from another stream.
-                We check your age, category and qualification against official notifications so you only see what you qualify for.
+                {t('home.hero_subtitle')}
               </p>
 
               {/* Action Buttons */}
@@ -128,7 +128,7 @@ export default function LandingPage() {
                   to="/register"
                   className="btn-primary text-base px-6 py-3"
                 >
-                  <span>Check my eligibility</span>
+                  <span>{t('home.cta_check')}</span>
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </Link>
                 <Link
@@ -136,7 +136,7 @@ export default function LandingPage() {
                   className="btn-secondary text-base px-6 py-3"
                 >
                   <Search className="w-4 h-4 text-text-secondary" aria-hidden="true" />
-                  <span>Browse all</span>
+                  <span>{t('home.cta_browse')}</span>
                 </Link>
               </div>
 

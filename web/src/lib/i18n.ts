@@ -3,32 +3,26 @@ import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 
 import enTranslation from '../locales/en/translation.json'
+import hinglishTranslation from '../locales/hinglish/translation.json'
 import hiTranslation from '../locales/hi/translation.json'
 
 export const resources = {
   en: {
     translation: enTranslation,
   },
+  'hi-Latn': {
+    translation: hinglishTranslation,
+  },
   hi: {
     translation: hiTranslation,
   },
 } as const
 
-// Supported languages list with native scripts
+// Supported languages list: English, Hinglish, Hindi
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', label: 'English', nativeName: 'English', script: 'latin' },
+  { code: 'hi-Latn', label: 'Hinglish', nativeName: 'Hinglish (हिंग्लिश)', script: 'latin' },
   { code: 'hi', label: 'Hindi', nativeName: 'हिन्दी', script: 'devanagari' },
-  { code: 'bn', label: 'Bengali', nativeName: 'বাংলা', script: 'bengali', comingSoon: true },
-  { code: 'mr', label: 'Marathi', nativeName: 'मराठी', script: 'devanagari', comingSoon: true },
-  { code: 'te', label: 'Telugu', nativeName: 'తెలుగు', script: 'telugu', comingSoon: true },
-  { code: 'ta', label: 'Tamil', nativeName: 'தமிழ்', script: 'tamil', comingSoon: true },
-  { code: 'gu', label: 'Gujarati', nativeName: 'ગુજરાતી', script: 'gujarati', comingSoon: true },
-  { code: 'kn', label: 'Kannada', nativeName: 'ಕನ್ನಡ', script: 'kannada', comingSoon: true },
-  { code: 'ml', label: 'Malayalam', nativeName: 'മലയാളം', script: 'malayalam', comingSoon: true },
-  { code: 'or', label: 'Odia', nativeName: 'ଓଡ଼ିଆ', script: 'odia', comingSoon: true },
-  { code: 'pa', label: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', script: 'gurmukhi', comingSoon: true },
-  { code: 'as', label: 'Assamese', nativeName: 'অসমীয়া', script: 'bengali', comingSoon: true },
-  { code: 'ur', label: 'Urdu', nativeName: 'اردو', script: 'arabic', comingSoon: true },
 ] as const
 
 i18n
@@ -37,7 +31,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
-    supportedLngs: ['en', 'hi'],
+    supportedLngs: ['en', 'hi-Latn', 'hi'],
     detection: {
       order: ['localStorage', 'navigator'],
       lookupLocalStorage: 'rexam_lang',

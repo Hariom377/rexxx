@@ -98,7 +98,7 @@ export default function AppLayout() {
               <span className="rexam-logo text-lg">REXAM</span>
               <span className="rexam-logo-dot text-lg font-bold">.</span>
             </Link>
-            <p className="text-2xs text-text-secondary mt-0.5">Updated daily</p>
+            <p className="text-2xs text-text-secondary mt-0.5">{t('common.updated_daily', 'Updated daily')}</p>
           </div>
           <LanguageSwitcher compact />
         </div>
@@ -210,7 +210,7 @@ export default function AppLayout() {
                 className="w-full min-h-[44px] flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-status-ineligible-text bg-status-ineligible-bg"
               >
                 <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Sign out</span>
+                <span>{t('nav.sign_out', 'Sign out')}</span>
               </button>
             </div>
           </div>

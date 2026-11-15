@@ -26,6 +26,7 @@
     "saved": "Saved",
     "applications": "Applications",
     "profile": "Profile",
+    "alerts": "Alerts",
     "settings": "Settings",
     "sign_out": "Sign out"
   },
@@ -53,7 +54,10 @@
     "vacancies": "vacancies",
     "last_date": "Last Date",
     "updated_on": "Updated on",
-    "official_sources": "official sources"
+    "official_sources": "official sources",
+    "official_source": "Official source",
+    "closed": "Closed",
+    "updated_daily": "Updated daily"
   },
   "eligibility": {
     "eligible": "Eligible",
@@ -96,14 +100,29 @@
   },
   "dashboard": {
     "welcome_back": "Welcome back",
+    "showing_for": "Showing opportunities for {{state}}",
     "tab_eligible": "Eligible",
     "tab_not_eligible": "Not eligible",
     "tab_more_info": "Need more info",
     "tab_saved": "Saved",
     "tab_applied": "Applied",
-    "deadlines_title": "Application Deadlines Closing Soon",
+    "deadlines_title": "APPLICATION DEADLINES CLOSING SOON",
     "view_all_deadlines": "View all deadlines",
-    "no_eligible": "No currently open matches for your exact qualifications today.",
+    "matching_subtitle": "Showing opportunities matching your qualifications and age with applicable statutory relaxations.",
+    "explore_all": "Explore all",
+    "no_matches_title": "No currently open matches",
+    "no_matches_desc": "We didn't find active recruitment notifications matching your exact qualification today. Check all listings or update your profile qualifications.",
+    "not_eligible_notice": "These opportunities are currently closed to your profile due to age limits or specific degree requirements in the official notification. We display them for full transparency.",
+    "no_ineligible": "No ineligible opportunities recorded.",
+    "missing_profile_title": "Missing profile details required for verification",
+    "missing_profile_desc": "Please provide your Date of Birth or complete your educational qualifications so we can calculate your eligibility.",
+    "complete_profile": "Complete Profile",
+    "profile_complete": "Your profile is complete! All available opportunities have been evaluated.",
+    "no_saved_title": "No saved opportunities yet",
+    "no_saved_desc": "Bookmark opportunities from the Explorer or Eligible tab to track them here.",
+    "no_applied_title": "No applications tracked yet",
+    "no_applied_desc": "Track recruitment examinations you have applied for, along with admit card and result stages.",
+    "track_application": "Track an Application",
     "browse_all": "Browse All Opportunities"
   },
   "wizard": {

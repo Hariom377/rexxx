@@ -11,6 +11,7 @@ import type { ExaminationWithDetails, CandidateEducation } from '../../types'
 import { formatDate } from '../../lib/utils'
 import { LoadingSpinner } from '../../components/shared/LoadingSpinner'
 import { EligibilityBadge } from '../../components/shared/EligibilityBadge'
+import { calculateAge, isAgeEligible, isEducationEligible } from '../../lib/eligibility'
 
 export default function EligibilityReportPage() {
   const { id } = useParams<{ id: string }>()
@@ -102,19 +103,12 @@ export default function EligibilityReportPage() {
 
   const isAgeValid =
     candidateAge !== null && rules
-      ? candidateAge >= rules.min_age && candidateAge <= maxAllowedAge
+      ? isAgeEligible(candidateAge, rules.min_age, rules.max_age, ageRelaxation)
       : null
 
   // 2. Qualification Evaluation
   const requiredQuals = rules?.educational_qualifications || []
-  const hasMatchingQual =
-    requiredQuals.length === 0 ||
-    education.some((e) =>
-      requiredQuals.some((rq) =>
-        rq.toLowerCase().includes(e.highest_qualification.toLowerCase()) ||
-        e.highest_qualification.toLowerCase().includes(rq.toLowerCase())
-      )
-    )
+  const hasMatchingQual = isEducationEligible(education, requiredQuals)
 
   // 3. Overall Verdict
   const hasProfileData = candidateAge !== null && education.length > 0

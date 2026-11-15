@@ -1,23 +1,25 @@
 import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  Clock, Bookmark, FileText, ArrowRight, Search, Bell, TrendingUp,
-  CheckCircle2, XCircle, AlertCircle, Sparkles
+  Clock, Bookmark, FileText, ArrowRight,
+  CheckCircle2, XCircle, AlertCircle
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
-import type { ExaminationWithDetails, CandidateEducation, CandidateApplication } from '../../types'
+import type { ExaminationWithDetails, CandidateEducation } from '../../types'
 import { OpportunityCard } from '../../components/shared/OpportunityCard'
 import { SearchBar } from '../../components/shared/SearchBar'
-import { EligibilityBadge } from '../../components/shared/EligibilityBadge'
 import { EmptyState } from '../../components/shared/EmptyState'
+import { calculateAge, isAgeEligible, isEducationEligible } from '../../lib/eligibility'
 
 type DashboardTab = 'eligible' | 'not_eligible' | 'more_info' | 'saved' | 'applied'
 
 export default function DiscoverPage() {
   const { user, profile } = useAuth()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
@@ -93,7 +95,7 @@ export default function DiscoverPage() {
     enabled: !!user,
   })
 
-  // 5. Fetch Opportunities
+  // 5. Fetch Opportunities (up to 30 published)
   const { data: allExams = [], isLoading: recLoading } = useQuery<ExaminationWithDetails[]>({
     queryKey: ['dashboard-all-exams'],
     queryFn: async () => {
@@ -140,7 +142,7 @@ export default function DiscoverPage() {
     },
   })
 
-  // Categorize Opportunities by Eligibility
+  // Categorize Opportunities by Personalized Eligibility Engine
   const { eligibleList, notEligibleList, needMoreInfoList } = useMemo(() => {
     const eligible: ExaminationWithDetails[] = []
     const notEligible: ExaminationWithDetails[] = []
@@ -149,20 +151,11 @@ export default function DiscoverPage() {
     const hasDob = !!profile?.date_of_birth
     const hasEducation = education.length > 0
 
-    // Candidate age calculation
-    let candidateAge: number | null = null
-    let ageRelaxation = 0
-    if (profile?.date_of_birth) {
-      const dob = new Date(profile.date_of_birth)
-      const now = new Date()
-      let age = now.getFullYear() - dob.getFullYear()
-      const m = now.getMonth() - dob.getMonth()
-      if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) {
-        age--
-      }
-      candidateAge = age
-    }
+    // Accurate candidate age calculation
+    const candidateAge = profile?.date_of_birth ? calculateAge(profile.date_of_birth) : null
 
+    // Statutory age relaxations per official GoI rules
+    let ageRelaxation = 0
     if (profile?.social_category === 'SC' || profile?.social_category === 'ST') {
       ageRelaxation += 5
     } else if (profile?.social_category === 'OBC-NCL') {
@@ -185,26 +178,11 @@ export default function DiscoverPage() {
         return
       }
 
-      // Age check
-      let agePassed = true
-      if (candidateAge !== null) {
-        const maxAllowed = rules.max_age + ageRelaxation
-        if (candidateAge < rules.min_age || candidateAge > maxAllowed) {
-          agePassed = false
-        }
-      }
+      // Age check with statutory relaxation
+      const agePassed = isAgeEligible(candidateAge, rules.min_age, rules.max_age, ageRelaxation)
 
-      // Qualification check
-      let qualPassed = true
-      const requiredQuals = rules.educational_qualifications || []
-      if (requiredQuals.length > 0) {
-        qualPassed = education.some((e) =>
-          requiredQuals.some((rq) =>
-            rq.toLowerCase().includes(e.highest_qualification.toLowerCase()) ||
-            e.highest_qualification.toLowerCase().includes(rq.toLowerCase())
-          )
-        )
-      }
+      // Qualification check using Indian degree & hierarchy matching engine
+      const qualPassed = isEducationEligible(education, rules.educational_qualifications)
 
       if (agePassed && qualPassed) {
         eligible.push(exam)
@@ -236,35 +214,35 @@ export default function DiscoverPage() {
   return (
     <>
       <Helmet>
-        <title>Dashboard — REXAM</title>
+        <title>{t('nav.dashboard')} — REXAM</title>
         <meta name="robots" content="noindex" />
       </Helmet>
 
       <div className="content-frame max-w-content py-6 sm:py-8 space-y-8">
 
         {/* ── Welcome Header ───────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5 border-b border-border-default pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5 border-b border-border pb-6">
           <div>
             <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
               {todayFormatted}
             </p>
             <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
-              Welcome back, {firstName}
+              {t('dashboard.welcome_back')}, {firstName}
             </h1>
             {profile?.state && (
               <p className="text-sm text-text-secondary mt-1">
-                Showing opportunities for <strong className="text-text-primary">{profile.state}</strong>
+                {t('dashboard.showing_for', { state: profile.state })}
                 {profile.social_category && profile.social_category !== 'General' && (
-                  <> · <span className="font-medium text-brand-action">{profile.social_category}</span> statutory relaxation active</>
+                  <> · <span className="font-semibold text-brand">{profile.social_category}</span> {t('eligibility.statutory_relaxation_applied')}</>
                 )}
-                {profile.is_pwbd && <> · <span className="font-medium text-brand-action">PwBD</span> relaxation active</>}
+                {profile.is_pwbd && <> · <span className="font-semibold text-brand">PwBD</span> {t('eligibility.statutory_relaxation_applied')}</>}
               </p>
             )}
           </div>
 
           <div className="w-full sm:w-72 flex-shrink-0">
             <SearchBar
-              placeholder="Search all exams, jobs..."
+              placeholder={t('common.search_placeholder')}
               value={search}
               onChange={setSearch}
               onSearch={(q) => navigate(`/explorer?q=${encodeURIComponent(q)}`)}
@@ -279,11 +257,11 @@ export default function DiscoverPage() {
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-amber-600" />
                 <h2 className="text-sm font-bold text-text-primary uppercase tracking-wide">
-                  Application Deadlines Closing Soon
+                  {t('dashboard.deadlines_title')}
                 </h2>
               </div>
-              <Link to="/explorer" className="text-xs font-semibold text-brand-action hover:underline">
-                View all deadlines
+              <Link to="/explorer" className="text-xs font-semibold text-brand hover:underline">
+                {t('dashboard.view_all_deadlines')}
               </Link>
             </div>
 
@@ -303,7 +281,7 @@ export default function DiscoverPage() {
 
         {/* ── Main Dashboard Tabs ───────────────────────────── */}
         <div>
-          <div className="border-b border-border-default">
+          <div className="border-b border-border">
             <nav className="flex space-x-1 sm:space-x-4 overflow-x-auto pb-px" aria-label="Dashboard sections">
               {/* Tab 1: Eligible */}
               <button
@@ -311,13 +289,13 @@ export default function DiscoverPage() {
                 onClick={() => setActiveTab('eligible')}
                 className={`min-h-[44px] px-3.5 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap transition-colors ${
                   activeTab === 'eligible'
-                    ? 'border-brand-action text-brand-action'
-                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-slate-300'
+                    ? 'border-brand text-brand'
+                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
                 }`}
               >
-                <CheckCircle2 className="w-4 h-4 text-status-eligible" />
-                Eligible
-                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-status-eligible-bg text-status-eligible font-bold border border-status-eligible-border">
+                <CheckCircle2 className="w-4 h-4 text-status-eligible-text" />
+                {t('dashboard.tab_eligible')}
+                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-status-eligible-bg text-status-eligible-text font-bold border border-status-eligible-border">
                   {eligibleList.length}
                 </span>
               </button>
@@ -328,13 +306,13 @@ export default function DiscoverPage() {
                 onClick={() => setActiveTab('not_eligible')}
                 className={`min-h-[44px] px-3.5 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap transition-colors ${
                   activeTab === 'not_eligible'
-                    ? 'border-brand-action text-brand-action'
-                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-slate-300'
+                    ? 'border-brand text-brand'
+                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
                 }`}
               >
-                <XCircle className="w-4 h-4 text-status-ineligible" />
-                Not eligible
-                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-status-ineligible-bg text-status-ineligible font-bold border border-status-ineligible-border">
+                <XCircle className="w-4 h-4 text-status-ineligible-text" />
+                {t('dashboard.tab_not_eligible')}
+                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-status-ineligible-bg text-status-ineligible-text font-bold border border-status-ineligible-border">
                   {notEligibleList.length}
                 </span>
               </button>
@@ -345,13 +323,13 @@ export default function DiscoverPage() {
                 onClick={() => setActiveTab('more_info')}
                 className={`min-h-[44px] px-3.5 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap transition-colors ${
                   activeTab === 'more_info'
-                    ? 'border-brand-action text-brand-action'
-                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-slate-300'
+                    ? 'border-brand text-brand'
+                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
                 }`}
               >
-                <AlertCircle className="w-4 h-4 text-status-moreinfo" />
-                Need more info
-                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-status-moreinfo-bg text-status-moreinfo font-bold border border-status-moreinfo-border">
+                <AlertCircle className="w-4 h-4 text-amber-600" />
+                {t('dashboard.tab_more_info')}
+                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-amber-50 text-amber-700 font-bold border border-amber-200">
                   {needMoreInfoList.length}
                 </span>
               </button>
@@ -362,13 +340,13 @@ export default function DiscoverPage() {
                 onClick={() => setActiveTab('saved')}
                 className={`min-h-[44px] px-3.5 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap transition-colors ${
                   activeTab === 'saved'
-                    ? 'border-brand-action text-brand-action'
-                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-slate-300'
+                    ? 'border-brand text-brand'
+                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
                 }`}
               >
-                <Bookmark className="w-4 h-4 text-brand-action" />
-                Saved
-                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-blue-50 text-brand-action font-bold border border-blue-200">
+                <Bookmark className="w-4 h-4 text-brand" />
+                {t('dashboard.tab_saved')}
+                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-brand-light text-brand font-bold border border-brand-subtle">
                   {stats.saved}
                 </span>
               </button>
@@ -379,13 +357,13 @@ export default function DiscoverPage() {
                 onClick={() => setActiveTab('applied')}
                 className={`min-h-[44px] px-3.5 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap transition-colors ${
                   activeTab === 'applied'
-                    ? 'border-brand-action text-brand-action'
-                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-slate-300'
+                    ? 'border-brand text-brand'
+                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
                 }`}
               >
                 <FileText className="w-4 h-4 text-text-secondary" />
-                Applied
-                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-slate-100 text-text-secondary font-bold border border-border-default">
+                {t('dashboard.tab_applied')}
+                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-bg-secondary text-text-secondary font-bold border border-border">
                   {stats.applied}
                 </span>
               </button>
@@ -397,7 +375,7 @@ export default function DiscoverPage() {
             {recLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="bg-white border border-border-default rounded-lg p-6 h-56 animate-pulse" />
+                  <div key={i} className="card p-6 h-56 skeleton" />
                 ))}
               </div>
             ) : (
@@ -407,25 +385,27 @@ export default function DiscoverPage() {
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <p className="text-sm text-text-secondary">
-                        Showing opportunities matching your qualifications and age with applicable statutory relaxations.
+                        {t('dashboard.matching_subtitle')}
                       </p>
-                      <Link to="/explorer" className="text-xs font-semibold text-brand-action hover:underline flex items-center gap-1">
-                        Explore all <ArrowRight className="w-3.5 h-3.5" />
+                      <Link to="/explorer" className="text-xs font-semibold text-brand hover:underline flex items-center gap-1">
+                        {t('dashboard.explore_all')} <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
 
                     {eligibleList.length === 0 ? (
-                      <div className="bg-white border border-border-default rounded-lg p-10 text-center">
-                        <CheckCircle2 className="w-10 h-10 text-status-eligible mx-auto mb-3" />
-                        <h3 className="text-base font-bold text-text-primary mb-1">No currently open matches</h3>
+                      <div className="card p-10 text-center">
+                        <CheckCircle2 className="w-10 h-10 text-status-eligible-text mx-auto mb-3" />
+                        <h3 className="text-base font-bold text-text-primary mb-1">
+                          {t('dashboard.no_matches_title')}
+                        </h3>
                         <p className="text-sm text-text-secondary max-w-md mx-auto mb-4">
-                          We didn't find active recruitment notifications matching your exact qualification today. Check all listings or update your profile qualifications.
+                          {t('dashboard.no_matches_desc')}
                         </p>
                         <Link
                           to="/explorer"
-                          className="inline-flex items-center min-h-[44px] px-5 py-2.5 rounded-lg bg-brand-action text-white text-sm font-semibold hover:bg-brand-action-hover"
+                          className="btn-primary text-sm font-semibold"
                         >
-                          Browse All Opportunities
+                          {t('dashboard.browse_all')}
                         </Link>
                       </div>
                     ) : (
@@ -447,16 +427,16 @@ export default function DiscoverPage() {
                 {/* ── Not Eligible Tab ── */}
                 {activeTab === 'not_eligible' && (
                   <div>
-                    <div className="p-3.5 mb-5 rounded-lg bg-bg-alternate border border-border-default text-xs text-text-secondary flex items-start gap-2.5">
-                      <XCircle className="w-4 h-4 text-status-ineligible flex-shrink-0 mt-0.5" />
+                    <div className="p-3.5 mb-5 rounded-lg bg-bg-secondary border border-border text-xs text-text-secondary flex items-start gap-2.5">
+                      <XCircle className="w-4 h-4 text-status-ineligible-text flex-shrink-0 mt-0.5" />
                       <p>
-                        These opportunities are currently closed to your profile due to age limits or specific degree requirements in the official notification. We display them for full transparency.
+                        {t('dashboard.not_eligible_notice')}
                       </p>
                     </div>
 
                     {notEligibleList.length === 0 ? (
-                      <div className="bg-white border border-border-default rounded-lg p-10 text-center text-text-secondary text-sm">
-                        No ineligible opportunities recorded.
+                      <div className="card p-10 text-center text-text-secondary text-sm">
+                        {t('dashboard.no_ineligible')}
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -477,27 +457,27 @@ export default function DiscoverPage() {
                 {/* ── Need More Info Tab ── */}
                 {activeTab === 'more_info' && (
                   <div>
-                    <div className="p-4 mb-5 rounded-lg bg-status-moreinfo-bg border border-status-moreinfo-border text-sm text-status-moreinfo flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="p-4 mb-5 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                       <div className="flex items-start gap-2.5">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-status-moreinfo" />
+                        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600" />
                         <div>
-                          <p className="font-bold">Missing profile details required for verification</p>
+                          <p className="font-bold">{t('dashboard.missing_profile_title')}</p>
                           <p className="text-xs text-text-secondary mt-0.5">
-                            Please provide your Date of Birth or complete your educational qualifications so we can calculate your eligibility.
+                            {t('dashboard.missing_profile_desc')}
                           </p>
                         </div>
                       </div>
                       <Link
                         to="/profile/edit"
-                        className="min-h-[44px] inline-flex items-center px-4 py-2 rounded-lg bg-white border border-status-moreinfo-border text-text-primary text-xs font-bold hover:bg-slate-50 flex-shrink-0"
+                        className="btn-secondary text-xs font-bold flex-shrink-0"
                       >
-                        Complete Profile
+                        {t('dashboard.complete_profile')}
                       </Link>
                     </div>
 
                     {needMoreInfoList.length === 0 ? (
-                      <div className="bg-white border border-border-default rounded-lg p-10 text-center text-text-secondary text-sm">
-                        Your profile is complete! All available opportunities have been evaluated.
+                      <div className="card p-10 text-center text-text-secondary text-sm">
+                        {t('dashboard.profile_complete')}
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -520,11 +500,11 @@ export default function DiscoverPage() {
                     {savedList.length === 0 ? (
                       <EmptyState
                         icon={Bookmark}
-                        title="No saved opportunities"
-                        description="Click the bookmark icon on any exam or scholarship card to save it for quick review."
+                        title={t('dashboard.no_saved_title')}
+                        description={t('dashboard.no_saved_desc')}
                         action={
-                          <Link to="/explorer" className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white text-sm font-semibold transition-colors">
-                            Browse Opportunities
+                          <Link to="/explorer" className="btn-primary text-sm font-semibold">
+                            {t('dashboard.browse_all')}
                           </Link>
                         }
                       />
@@ -549,51 +529,34 @@ export default function DiscoverPage() {
                     {applications.length === 0 ? (
                       <EmptyState
                         icon={FileText}
-                        title="No applications tracked yet"
-                        description="When you apply on an official website, mark it on the examination page to track admit cards and results."
+                        title={t('dashboard.no_applied_title')}
+                        description={t('dashboard.no_applied_desc')}
                         action={
-                          <Link to="/explorer" className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white text-sm font-semibold transition-colors">
-                            Explore Opportunities
+                          <Link to="/explorer" className="btn-primary text-sm font-semibold">
+                            {t('dashboard.track_application')}
                           </Link>
                         }
                       />
                     ) : (
-                      <div className="space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {applications.map((app) => (
-                          <div
-                            key={app.id}
-                            className="bg-white border border-border-default rounded-lg p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                          >
-                            <div>
-                              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-brand-action border border-blue-200">
-                                {app.stage || 'Applied'}
+                          <div key={app.id} className="card p-5">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="badge bg-brand-light text-brand">
+                                {app.stage}
                               </span>
-                              <h3 className="text-base font-bold text-text-primary mt-1.5">
-                                {app.examinations?.name || 'Examination Application'}
-                              </h3>
-                              <p className="text-xs text-text-secondary mt-0.5">
-                                {app.examinations?.organisations?.name || 'Official Recruitment'}
+                              <span className="text-2xs text-text-secondary">
+                                {new Date(app.updated_at).toLocaleDateString('en-IN')}
+                              </span>
+                            </div>
+                            <h3 className="font-bold text-text-primary text-sm mb-1">
+                              {app.examinations?.name || 'Examination Application'}
+                            </h3>
+                            {app.application_number && (
+                              <p className="text-xs text-text-secondary">
+                                App No: {app.application_number}
                               </p>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                              <Link
-                                to={`/opportunities/${app.examinations?.slug || app.examination_id}`}
-                                className="min-h-[44px] inline-flex items-center px-4 py-2 rounded-lg border border-border-default bg-white hover:bg-slate-50 text-xs font-semibold text-text-primary transition-colors"
-                              >
-                                View Details
-                              </Link>
-                              {app.examinations?.official_application_url && (
-                                <a
-                                  href={app.examinations.official_application_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-action hover:bg-brand-action-hover text-white text-xs font-semibold transition-colors"
-                                >
-                                  Portal Link <ArrowRight className="w-3.5 h-3.5" />
-                                </a>
-                              )}
-                            </div>
+                            )}
                           </div>
                         ))}
                       </div>

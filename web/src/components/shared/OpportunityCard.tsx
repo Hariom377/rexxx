@@ -84,7 +84,7 @@ export function OpportunityCard({
             {exam.is_official_source && (
               <span className="verified-badge">
                 <Shield className="w-3 h-3 text-text-secondary" aria-hidden="true" />
-                <span>Official source</span>
+                <span>{t('common.official_source', 'Official source')}</span>
               </span>
             )}
           </div>
@@ -156,7 +156,7 @@ export function OpportunityCard({
             >
               <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
               {deadline.expired
-                ? 'Closed'
+                ? t('common.closed', 'Closed')
                 : `${t('common.last_date')}: ${formatDate(exam.examination_dates.application_closing_date, 'short')}`}
             </span>
           )}

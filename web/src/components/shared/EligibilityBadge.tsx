@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
 
 export type EligibilityStatus = 'eligible' | 'ineligible' | 'info' | boolean | null | undefined
@@ -18,6 +19,7 @@ export function EligibilityBadge({
   size = 'md',
   className = '',
 }: EligibilityBadgeProps) {
+  const { t } = useTranslation()
   if (status === null || status === undefined) return null
 
   const isEligible = status === true || status === 'eligible'
@@ -28,20 +30,20 @@ export function EligibilityBadge({
   let bgClass = 'bg-status-info-bg'
   let borderClass = 'border-status-info-border'
   let Icon = AlertTriangle
-  let defaultLabel = 'Need more info'
+  let defaultLabel = t('eligibility.need_more_info', 'Need more info')
 
   if (isEligible) {
     textClass = 'text-status-eligible-text'
     bgClass = 'bg-status-eligible-bg'
     borderClass = 'border-status-eligible-border'
     Icon = CheckCircle2
-    defaultLabel = 'Eligible'
+    defaultLabel = t('eligibility.eligible', 'Eligible')
   } else if (isIneligible) {
     textClass = 'text-status-ineligible-text'
     bgClass = 'bg-status-ineligible-bg'
     borderClass = 'border-status-ineligible-border'
     Icon = XCircle
-    defaultLabel = 'Not eligible'
+    defaultLabel = t('eligibility.not_eligible', 'Not eligible')
   }
 
   const displayLabel = label || defaultLabel

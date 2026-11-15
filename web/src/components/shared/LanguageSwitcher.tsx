@@ -13,8 +13,7 @@ export function LanguageSwitcher({ className = '', compact = false }: LanguageSw
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Current language code (normalized to 2-letter, e.g., 'en-US' -> 'en')
-  const currentLang = (i18n.language || 'en').split('-')[0]
+  const currentLang = i18n.language || 'en'
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -40,7 +39,9 @@ export function LanguageSwitcher({ className = '', compact = false }: LanguageSw
   }
 
   const activeLangObj =
-    SUPPORTED_LANGUAGES.find((l) => l.code === currentLang) || SUPPORTED_LANGUAGES[0]
+    SUPPORTED_LANGUAGES.find((l) => l.code === currentLang) ||
+    SUPPORTED_LANGUAGES.find((l) => l.code === currentLang.split('-')[0]) ||
+    SUPPORTED_LANGUAGES[0]
 
   return (
     <div ref={containerRef} className={`relative inline-block ${className}`}>
@@ -50,10 +51,10 @@ export function LanguageSwitcher({ className = '', compact = false }: LanguageSw
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label="Select interface language"
-        className="min-h-[44px] px-3 py-2 inline-flex items-center gap-2 rounded-lg border border-border-default bg-white text-text-primary text-sm font-semibold hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action transition-colors"
+        className="min-h-[44px] px-3 py-2 inline-flex items-center gap-2 rounded-lg border border-border bg-bg-card text-text-primary text-sm font-semibold hover:bg-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand transition-colors"
       >
         <Globe className="w-4 h-4 text-text-secondary" aria-hidden="true" />
-        <span>{compact ? activeLangObj.code.toUpperCase() : activeLangObj.nativeName}</span>
+        <span>{compact ? (activeLangObj.code === 'hi-Latn' ? 'HINGLISH' : activeLangObj.code.toUpperCase()) : activeLangObj.nativeName}</span>
         <ChevronDown className="w-3.5 h-3.5 text-text-secondary" aria-hidden="true" />
       </button>
 
@@ -61,11 +62,10 @@ export function LanguageSwitcher({ className = '', compact = false }: LanguageSw
         <div
           role="listbox"
           aria-label="Supported Languages"
-          className="absolute right-0 mt-1.5 w-48 max-h-72 overflow-y-auto bg-white border border-border-default rounded-lg shadow-md py-1 z-50 divide-y divide-border-default/50"
+          className="absolute right-0 mt-1.5 w-52 max-h-72 overflow-y-auto bg-bg-card border border-border rounded-lg shadow-elevated py-1 z-50 divide-y divide-border/50"
         >
           {SUPPORTED_LANGUAGES.map((lang) => {
-            const isSelected = lang.code === currentLang
-            const isComingSoon = 'comingSoon' in lang && lang.comingSoon
+            const isSelected = lang.code === currentLang || (lang.code === 'hi' && currentLang === 'hi')
 
             return (
               <button
@@ -73,24 +73,18 @@ export function LanguageSwitcher({ className = '', compact = false }: LanguageSw
                 type="button"
                 role="option"
                 aria-selected={isSelected}
-                disabled={isComingSoon}
-                onClick={() => !isComingSoon && handleSelect(lang.code)}
-                className={`w-full min-h-[40px] px-3.5 py-2 text-left text-sm flex items-center justify-between transition-colors ${
+                onClick={() => handleSelect(lang.code)}
+                className={`w-full min-h-[44px] px-3.5 py-2.5 text-left text-sm flex items-center justify-between transition-colors ${
                   isSelected
-                    ? 'bg-blue-50 text-brand-action font-bold'
-                    : isComingSoon
-                    ? 'text-text-secondary/50 cursor-not-allowed bg-slate-50/50'
-                    : 'text-text-primary hover:bg-slate-50 font-medium'
+                    ? 'bg-brand-light text-brand font-bold'
+                    : 'text-text-primary hover:bg-bg-secondary font-medium'
                 }`}
               >
                 <div>
                   <span className="block leading-tight">{lang.nativeName}</span>
                   <span className="text-2xs text-text-secondary block font-normal">{lang.label}</span>
                 </div>
-                {isSelected && <Check className="w-4 h-4 text-brand-action flex-shrink-0" />}
-                {isComingSoon && (
-                  <span className="text-2xs text-text-secondary/60 uppercase">Soon</span>
-                )}
+                {isSelected && <Check className="w-4 h-4 text-brand flex-shrink-0" />}
               </button>
             )
           })}
