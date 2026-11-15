@@ -64,6 +64,8 @@ export default function App() {
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
         {/* Mandatory Onboarding Wizard (Protected, bypasses full AppLayout) */}
+        <Route path="/onboarding" element={<Navigate to="/profile/wizard" replace />} />
+        <Route path="/wizard" element={<Navigate to="/profile/wizard" replace />} />
         <Route
           path="/profile/wizard"
           element={
